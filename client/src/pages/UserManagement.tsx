@@ -1,33 +1,21 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Plus, Search, Users, Edit, Trash2, UserCheck } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  Crown, 
-  ClipboardCheck, 
-  Package, 
-  ServerCog, 
-  PackageOpen, 
-  Truck,
-  User
-} from "lucide-react";
 
 interface User {
   id: number;
@@ -54,46 +42,28 @@ const userSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   role: z.enum(["admin", "receptionist", "components", "assembly", "packaging", "shipping"]),
+  isActive: z.boolean().default(true),
 });
 
 type UserFormData = z.infer<typeof userSchema>;
 
 export default function UserManagement() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
-  const [showCreateModal, setShowCreateModal] = useState(false);
-
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  const { data: users, isLoading: usersLoading } = useQuery<User[]>({
+  const { data: users, isLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
+    retry: false,
   });
 
-  const { data: userStats, isLoading: statsLoading } = useQuery<UserStats>({
+  const { data: stats } = useQuery<UserStats>({
     queryKey: ["/api/users/stats"],
-  });
-
-  const createUserMutation = useMutation({
-    mutationFn: async (userData: UserFormData) => {
-      return await apiRequest("POST", "/api/users", userData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users/stats"] });
-      setShowCreateModal(false);
-      toast({
-        title: "Success",
-        description: "User created successfully",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to create user",
-        variant: "destructive",
-      });
-    },
+    retry: false,
   });
 
   const form = useForm<UserFormData>({
@@ -104,100 +74,163 @@ export default function UserManagement() {
       firstName: "",
       lastName: "",
       role: "receptionist",
+      isActive: true,
+    },
+  });
+
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: UserFormData) => {
+      return await apiRequest("POST", "/api/users", userData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/stats"] });
+      setIsCreateDialogOpen(false);
+      form.reset();
+      toast({
+        title: "Success",
+        description: "User created successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ userId, userData }: { userId: number; userData: Partial<UserFormData> }) => {
+      return await apiRequest("PATCH", `/api/users/${userId}`, userData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/stats"] });
+      setEditingUser(null);
+      toast({
+        title: "Success",
+        description: "User updated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      return await apiRequest("DELETE", `/api/users/${userId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/stats"] });
+      toast({
+        title: "Success",
+        description: "User deleted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
   const onSubmit = (data: UserFormData) => {
-    createUserMutation.mutate(data);
+    if (editingUser) {
+      updateUserMutation.mutate({ userId: editingUser.id, userData: data });
+    } else {
+      createUserMutation.mutate(data);
+    }
   };
 
-  const filteredUsers = users?.filter((user) => {
+  const handleEdit = (userToEdit: User) => {
+    setEditingUser(userToEdit);
+    form.reset({
+      email: userToEdit.email,
+      firstName: userToEdit.firstName,
+      lastName: userToEdit.lastName,
+      role: userToEdit.role as any,
+      isActive: userToEdit.isActive,
+      password: "", // Don't show existing password
+    });
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleDelete = (userId: number) => {
+    if (confirm("Are you sure you want to delete this user?")) {
+      deleteUserMutation.mutate(userId);
+    }
+  };
+
+  const filteredUsers = users?.filter(u => {
     const matchesSearch = 
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchQuery.toLowerCase());
+      u.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesRole = !roleFilter || user.role === roleFilter;
+    const matchesRole = roleFilter === "all" || u.role === roleFilter;
     
     return matchesSearch && matchesRole;
-  });
+  }) || [];
 
-  const getRoleIcon = (role: string) => {
-    const icons: Record<string, any> = {
-      admin: Crown,
-      receptionist: ClipboardCheck,
-      components: Package,
-      assembly: ServerCog,
-      packaging: PackageOpen,
-      shipping: Truck,
-    };
-    return icons[role] || User;
-  };
-
-  const getRoleColor = (role: string) => {
-    const colors: Record<string, string> = {
+  const getRoleBadgeColor = (role: string) => {
+    const colors = {
       admin: "bg-red-100 text-red-800",
       receptionist: "bg-blue-100 text-blue-800",
-      components: "bg-yellow-100 text-yellow-800",
-      assembly: "bg-green-100 text-green-800",
+      components: "bg-green-100 text-green-800",
+      assembly: "bg-yellow-100 text-yellow-800",
       packaging: "bg-purple-100 text-purple-800",
-      shipping: "bg-indigo-100 text-indigo-800",
+      shipping: "bg-orange-100 text-orange-800",
     };
-    return colors[role] || "bg-gray-100 text-gray-800";
+    return colors[role as keyof typeof colors] || "bg-gray-100 text-gray-800";
   };
 
-  const formatRole = (role: string) => {
-    const roleNames: Record<string, string> = {
-      admin: "Administrator",
-      receptionist: "Receptionist",
-      components: "Component Manager",
-      assembly: "Assembly Worker",
-      packaging: "Packaging Worker",
-      shipping: "Shipping Clerk",
-    };
-    return roleNames[role] || role;
-  };
-
-  const StatCard = ({ 
-    title, 
-    value, 
-    icon: Icon, 
-    color 
-  }: { 
-    title: string; 
-    value: number; 
-    icon: any; 
-    color: string; 
-  }) => (
-    <Card>
-      <CardContent className="p-4 text-center">
-        <div className={`w-10 h-10 ${color} rounded-full flex items-center justify-center mx-auto mb-2`}>
-          <Icon className="w-5 h-5 text-white" />
-        </div>
-        <div className="text-lg font-bold text-gray-900">{value}</div>
-        <div className="text-xs text-gray-600">{title}</div>
-      </CardContent>
-    </Card>
-  );
+  if (!user || user.role !== 'admin') {
+    return (
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+        <Card>
+          <CardContent className="text-center py-12">
+            <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
+            <p className="text-gray-600">You don't have permission to manage users.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600">Manage system users and their roles</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">User Management</h1>
+          <p className="text-gray-600 mt-1">Manage system users and permissions</p>
         </div>
-        <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-sky-blue-500 hover:bg-sky-blue-600">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button className="w-full sm:w-auto">
+              <Plus className="h-4 w-4 mr-2" />
               Add User
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-md mx-auto max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create New User</DialogTitle>
+              <DialogTitle>{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
+              <DialogDescription>
+                {editingUser ? 'Update user information and permissions' : 'Add a new user to the system'}
+              </DialogDescription>
             </DialogHeader>
+            
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -228,6 +261,7 @@ export default function UserManagement() {
                     )}
                   />
                 </div>
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -241,12 +275,13 @@ export default function UserManagement() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{editingUser ? 'New Password (leave blank to keep current)' : 'Password'}</FormLabel>
                       <FormControl>
                         <Input type="password" {...field} />
                       </FormControl>
@@ -254,22 +289,23 @@ export default function UserManagement() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="role"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Role</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a role" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="admin">Administrator</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
                           <SelectItem value="receptionist">Receptionist</SelectItem>
-                          <SelectItem value="components">Component Manager</SelectItem>
+                          <SelectItem value="components">Components Manager</SelectItem>
                           <SelectItem value="assembly">Assembly Worker</SelectItem>
                           <SelectItem value="packaging">Packaging Worker</SelectItem>
                           <SelectItem value="shipping">Shipping Clerk</SelectItem>
@@ -279,175 +315,175 @@ export default function UserManagement() {
                     </FormItem>
                   )}
                 />
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => setShowCreateModal(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    disabled={createUserMutation.isPending}
-                    className="bg-sky-blue-500 hover:bg-sky-blue-600"
-                  >
-                    {createUserMutation.isPending ? "Creating..." : "Create User"}
-                  </Button>
-                </div>
+
+                <FormField
+                  control={form.control}
+                  name="isActive"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Active User</FormLabel>
+                        <div className="text-sm text-muted-foreground">
+                          User can log in and access the system
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={createUserMutation.isPending || updateUserMutation.isPending}
+                >
+                  {createUserMutation.isPending || updateUserMutation.isPending 
+                    ? (editingUser ? "Updating..." : "Creating...") 
+                    : (editingUser ? "Update User" : "Create User")}
+                </Button>
               </form>
             </Form>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Role Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {statsLoading ? (
-          Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-4 text-center">
-                <Skeleton className="w-10 h-10 rounded-full mx-auto mb-2" />
-                <Skeleton className="h-6 w-8 mx-auto mb-1" />
-                <Skeleton className="h-3 w-16 mx-auto" />
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <>
-            <StatCard title="Admin" value={userStats?.admin || 0} icon={Crown} color="bg-red-500" />
-            <StatCard title="Receptionist" value={userStats?.receptionist || 0} icon={ClipboardCheck} color="bg-blue-500" />
-            <StatCard title="Components" value={userStats?.components || 0} icon={Package} color="bg-yellow-500" />
-            <StatCard title="Assembly" value={userStats?.assembly || 0} icon={ServerCog} color="bg-green-500" />
-            <StatCard title="Packaging" value={userStats?.packaging || 0} icon={PackageOpen} color="bg-purple-500" />
-            <StatCard title="Shipping" value={userStats?.shipping || 0} icon={Truck} color="bg-indigo-500" />
-          </>
-        )}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        {stats && Object.entries(stats).map(([role, count]) => (
+          <Card key={role}>
+            <CardContent className="p-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold">{count}</div>
+                <div className="text-sm text-gray-600 capitalize">{role.replace('_', ' ')}</div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Users Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <CardTitle>All Users</CardTitle>
-            <div className="flex space-x-3">
+      {/* Filters */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search users..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-64"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
                 />
               </div>
-              <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="All Roles" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
-                  <SelectItem value="admin">Administrator</SelectItem>
-                  <SelectItem value="receptionist">Receptionist</SelectItem>
-                  <SelectItem value="components">Component Manager</SelectItem>
-                  <SelectItem value="assembly">Assembly Worker</SelectItem>
-                  <SelectItem value="packaging">Packaging Worker</SelectItem>
-                  <SelectItem value="shipping">Shipping Clerk</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
+            <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Filter by role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="receptionist">Receptionist</SelectItem>
+                <SelectItem value="components">Components</SelectItem>
+                <SelectItem value="assembly">Assembly</SelectItem>
+                <SelectItem value="packaging">Packaging</SelectItem>
+                <SelectItem value="shipping">Shipping</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </CardHeader>
-        <CardContent>
-          {usersLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg">
-                  <Skeleton className="w-10 h-10 rounded-full" />
-                  <div className="flex-1">
-                    <Skeleton className="h-4 w-32 mb-1" />
-                    <Skeleton className="h-3 w-48" />
-                  </div>
-                  <Skeleton className="h-6 w-24" />
-                  <Skeleton className="h-6 w-16" />
-                  <Skeleton className="h-4 w-20" />
-                  <div className="flex space-x-2">
-                    <Skeleton className="w-8 h-8" />
-                    <Skeleton className="w-8 h-8" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers && filteredUsers.length > 0 ? (
-                    filteredUsers.map((user) => {
-                      const RoleIcon = getRoleIcon(user.role);
-                      return (
-                        <TableRow key={user.id}>
-                          <TableCell>
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-sky-blue-500 rounded-full flex items-center justify-center">
-                                <User className="w-5 h-5 text-white" />
-                              </div>
-                              <div>
-                                <div className="font-medium text-gray-900">
-                                  {user.firstName} {user.lastName}
-                                </div>
-                                <div className="text-sm text-gray-500">{user.email}</div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={getRoleColor(user.role)}>
-                              <RoleIcon className="w-3 h-3 mr-1" />
-                              {formatRole(user.role)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={user.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                              {user.isActive ? "Active" : "Inactive"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-gray-500">
-                            {new Date(user.createdAt).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button size="sm" variant="ghost">
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700">
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8">
-                        <div className="text-gray-500">No users found</div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
         </CardContent>
       </Card>
+
+      {/* Users List */}
+      {isLoading ? (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading users...</p>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {filteredUsers.map((u) => (
+            <Card key={u.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
+                      <h3 className="font-semibold text-lg">{u.firstName} {u.lastName}</h3>
+                      <div className="flex gap-2">
+                        <Badge className={getRoleBadgeColor(u.role)}>
+                          {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
+                        </Badge>
+                        {u.isActive ? (
+                          <Badge variant="default" className="bg-green-100 text-green-800">
+                            Active
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">
+                            Inactive
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
+                      <p>
+                        <span className="font-medium">Email:</span> {u.email}
+                      </p>
+                      <p>
+                        <span className="font-medium">Created:</span> {new Date(u.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(u)}
+                      className="w-full sm:w-auto"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                    
+                    {u.id !== user.id && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(u.id)}
+                        disabled={deleteUserMutation.isPending}
+                        className="w-full sm:w-auto"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {filteredUsers.length === 0 && (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
+                <p className="text-gray-600">
+                  {users?.length === 0 
+                    ? "No users have been created yet." 
+                    : "No users match your current filters."}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
     </div>
   );
 }
