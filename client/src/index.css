@@ -1,0 +1,207 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 198 93% 60%; /* Sky blue primary */
+  --primary-foreground: 210 40% 98%;
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 198 93% 60%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 198 93% 60%;
+  --radius: 0.5rem;
+  
+  /* Custom Ultra PC colors */
+  --sky-blue-50: 240 100% 99%; /* #f0f9ff */
+  --sky-blue-100: 220 100% 95%; /* #e0f2fe */
+  --sky-blue-200: 208 100% 85%; /* #bae6fd */
+  --sky-blue-300: 199 95% 74%; /* #7dd3fc */
+  --sky-blue-400: 198 93% 60%; /* #38bdf8 */
+  --sky-blue-500: 199 89% 48%; /* #0ea5e9 */
+  --sky-blue-600: 200 98% 39%; /* #0284c7 */
+  --sky-blue-700: 201 96% 32%; /* #0369a1 */
+  --sky-blue-800: 201 90% 27%; /* #075985 */
+  --sky-blue-900: 202 80% 24%; /* #0c4a6e */
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 198 93% 60%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Custom utility classes for Ultra PC theme */
+.bg-sky-blue-50 { background-color: hsl(var(--sky-blue-50)); }
+.bg-sky-blue-100 { background-color: hsl(var(--sky-blue-100)); }
+.bg-sky-blue-200 { background-color: hsl(var(--sky-blue-200)); }
+.bg-sky-blue-300 { background-color: hsl(var(--sky-blue-300)); }
+.bg-sky-blue-400 { background-color: hsl(var(--sky-blue-400)); }
+.bg-sky-blue-500 { background-color: hsl(var(--sky-blue-500)); }
+.bg-sky-blue-600 { background-color: hsl(var(--sky-blue-600)); }
+.bg-sky-blue-700 { background-color: hsl(var(--sky-blue-700)); }
+.bg-sky-blue-800 { background-color: hsl(var(--sky-blue-800)); }
+.bg-sky-blue-900 { background-color: hsl(var(--sky-blue-900)); }
+
+.text-sky-blue-50 { color: hsl(var(--sky-blue-50)); }
+.text-sky-blue-100 { color: hsl(var(--sky-blue-100)); }
+.text-sky-blue-200 { color: hsl(var(--sky-blue-200)); }
+.text-sky-blue-300 { color: hsl(var(--sky-blue-300)); }
+.text-sky-blue-400 { color: hsl(var(--sky-blue-400)); }
+.text-sky-blue-500 { color: hsl(var(--sky-blue-500)); }
+.text-sky-blue-600 { color: hsl(var(--sky-blue-600)); }
+.text-sky-blue-700 { color: hsl(var(--sky-blue-700)); }
+.text-sky-blue-800 { color: hsl(var(--sky-blue-800)); }
+.text-sky-blue-900 { color: hsl(var(--sky-blue-900)); }
+
+.border-sky-blue-500 { border-color: hsl(var(--sky-blue-500)); }
+.border-sky-blue-600 { border-color: hsl(var(--sky-blue-600)); }
+
+/* Gradient backgrounds */
+.bg-gradient-sky {
+  background: linear-gradient(135deg, hsl(var(--sky-blue-400)) 0%, hsl(var(--sky-blue-600)) 100%);
+}
+
+/* Focus styles for sky blue theme */
+.focus-sky {
+  @apply focus:ring-2 focus:ring-primary focus:border-primary;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--sky-blue-400));
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--sky-blue-500));
+}
+
+/* Animations */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-out;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  border: 2px solid hsl(var(--muted));
+  border-top: 2px solid hsl(var(--sky-blue-500));
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Status badge styles */
+.status-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.status-created {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.status-confirmed {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.status-components_selected {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-assembly_started {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.status-assembly_completed {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.status-packaged {
+  @apply bg-indigo-100 text-indigo-800;
+}
+
+.status-shipped {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-delivered {
+  @apply bg-emerald-100 text-emerald-800;
+}
