@@ -1,5 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useState, useEffect } from "react";
 
 interface User {
   id: number;
@@ -21,12 +22,39 @@ interface AuthResponse {
 
 export function useAuth() {
   const queryClient = useQueryClient();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: user, isLoading } = useQuery<User | null>({
-    queryKey: ["/api/auth/me"],
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        } else {
+          localStorage.removeItem("auth_token");
+        }
+      } catch (error) {
+        localStorage.removeItem("auth_token");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials): Promise<AuthResponse> => {
@@ -34,17 +62,15 @@ export function useAuth() {
       return response.json();
     },
     onSuccess: (data) => {
-      // Store token in localStorage
       localStorage.setItem("auth_token", data.token);
-      // Update query cache
-      queryClient.setQueryData(["/api/auth/me"], data.user);
+      setUser(data.user);
     },
   });
 
   const logout = () => {
     localStorage.removeItem("auth_token");
+    setUser(null);
     queryClient.clear();
-    window.location.reload();
   };
 
   return {
