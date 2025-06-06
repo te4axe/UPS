@@ -85,7 +85,7 @@ export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
   orderNumber: text("order_number").notNull().unique(),
   customerId: integer("customer_id").references(() => customers.id),
-  productId: integer("product_id").references(() => products.id),
+  currentAssigneeId: integer("current_assignee_id").references(() => users.id),
   status: text("status").notNull().default("created"), // created, confirmed, components_selected, assembly_started, assembly_completed, packaged, shipped, delivered
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
   specifications: jsonb("specifications"), // Custom PC specs
@@ -155,9 +155,9 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
     fields: [orders.customerId],
     references: [customers.id],
   }),
-  product: one(products, {
-    fields: [orders.productId],
-    references: [products.id],
+  currentAssignee: one(users, {
+    fields: [orders.currentAssigneeId],
+    references: [users.id],
   }),
   statusHistory: many(orderStatusHistory),
   components: many(orderComponents),
@@ -287,8 +287,8 @@ export type OrderStatus = typeof ORDER_STATUSES[number];
 // User roles enum
 export const USER_ROLES = [
   "admin",
-  "receptionist",
-  "components", 
+  "receptionist", // Réceptionnaire - crée les commandes uniquement
+  "stock_manager", // Gestionnaire Stock - gère l'inventaire et les composants
   "assembly",
   "packaging",
   "shipping",
