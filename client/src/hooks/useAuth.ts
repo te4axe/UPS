@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 
 interface User {
   id: number;
@@ -16,26 +16,29 @@ interface LoginCredentials {
 
 export function useAuth() {
   const queryClient = useQueryClient();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Utiliser react-query pour gérer l'état d'authentification
-  const { data: user, isLoading, error } = useQuery({
-    queryKey: ["auth", "user"],
-    queryFn: async () => {
+  // Vérification initiale de l'authentification une seule fois
+  useEffect(() => {
+    const checkAuth = async () => {
       try {
         const response = await fetch("/api/auth/me", {
           credentials: 'include'
         });
-        if (!response.ok) {
-          throw new Error('Non authentifié');
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
         }
-        return response.json();
       } catch (error) {
-        throw error;
+        // Ignore les erreurs et reste déconnecté
+      } finally {
+        setIsLoading(false);
       }
-    },
-    retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+    };
+
+    checkAuth();
+  }, []);
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials): Promise<User> => {
@@ -56,9 +59,7 @@ export function useAuth() {
       return response.json();
     },
     onSuccess: (userData) => {
-      // Mettre à jour le cache avec les données utilisateur
-      queryClient.setQueryData(["auth", "user"], userData);
-      // Invalider toutes les requêtes pour recharger les données
+      setUser(userData);
       queryClient.invalidateQueries();
     },
   });
@@ -74,14 +75,13 @@ export function useAuth() {
       }
     },
     onSuccess: () => {
-      // Effacer le cache d'authentification
-      queryClient.setQueryData(["auth", "user"], null);
+      setUser(null);
       queryClient.clear();
     },
   });
 
   return {
-    user: user || null,
+    user,
     isLoading,
     isAuthenticated: !!user,
     login: loginMutation.mutateAsync,

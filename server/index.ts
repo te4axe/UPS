@@ -1,8 +1,22 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Configuration des sessions
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'ultra-pc-session-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // false pour développement
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 heures
+  }
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

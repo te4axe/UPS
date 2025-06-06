@@ -128,65 +128,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
-  // Authentication routes
+  // Routes d'authentification
   app.post('/api/auth/login', async (req, res) => {
     try {
-      console.log('Login attempt for:', req.body.email);
+      console.log('Tentative de connexion pour:', req.body.email);
       const { email, password } = loginSchema.parse(req.body);
       
       const user = await storage.getUserByEmail(email);
       if (!user) {
-        console.log('User not found:', email);
-        return res.status(401).json({ message: "Invalid credentials" });
+        console.log('Utilisateur non trouvé:', email);
+        return res.status(401).json({ message: "Identifiants invalides" });
       }
 
       const validPassword = await bcrypt.compare(password, user.password);
       if (!validPassword) {
-        console.log('Invalid password for user:', email);
-        return res.status(401).json({ message: "Invalid credentials" });
+        console.log('Mot de passe invalide pour utilisateur:', email);
+        return res.status(401).json({ message: "Identifiants invalides" });
       }
 
       if (!user.isActive) {
-        console.log('Account disabled for user:', email);
-        return res.status(401).json({ message: "Account is disabled" });
+        console.log('Compte désactivé pour utilisateur:', email);
+        return res.status(401).json({ message: "Compte désactivé" });
       }
 
-      const token = jwt.sign(
-        { 
-          id: user.id, 
-          email: user.email, 
-          role: user.role,
-          firstName: user.firstName,
-          lastName: user.lastName
-        },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
+      // Stocker les données utilisateur dans la session
+      req.session.user = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName
+      };
 
-      console.log('Login successful for:', email, 'Role:', user.role);
-
-      res.json({
-        token,
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-        },
-      });
-    } catch (error) {
-      console.error('Login error:', error);
-      res.status(400).json({ message: "Invalid request" });
-    }
-  });
-
-  app.get('/api/auth/me', authenticateToken, async (req: AuthenticatedRequest, res) => {
-    try {
-      const user = await storage.getUser(req.user!.id);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      console.log('Connexion réussie pour:', email, 'Rôle:', user.role);
 
       res.json({
         id: user.id,
@@ -196,8 +170,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: user.role,
       });
     } catch (error) {
-      console.error('Get user error:', error);
-      res.status(500).json({ message: "Internal server error" });
+      console.error('Erreur de connexion:', error);
+      res.status(400).json({ message: "Demande invalide" });
+    }
+  });
+
+  app.get('/api/auth/me', authenticateToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      res.json(req.user);
+    } catch (error) {
+      console.error('Erreur récupération utilisateur:', error);
+      res.status(500).json({ message: "Erreur serveur interne" });
+    }
+  });
+
+  app.post('/api/auth/logout', authenticateToken, async (req, res) => {
+    try {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Erreur déconnexion:', err);
+          return res.status(500).json({ message: "Erreur de déconnexion" });
+        }
+        res.clearCookie('connect.sid');
+        res.json({ message: "Déconnexion réussie" });
+      });
+    } catch (error) {
+      console.error('Erreur logout:', error);
+      res.status(500).json({ message: "Erreur serveur" });
     }
   });
 
