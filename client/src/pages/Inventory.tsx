@@ -15,13 +15,16 @@ import { apiRequest } from "@/lib/queryClient";
 
 interface Component {
   id: number;
+  reference: string;
   name: string;
   type: string;
+  brand?: string;
+  model?: string;
   stockQuantity: number;
   minStockLevel: number;
   price: string;
-  supplier?: string;
-  description?: string;
+  location?: string;
+  specifications?: any;
   createdAt: string;
 }
 
@@ -103,9 +106,10 @@ export default function Inventory() {
     const matchesSearch = 
       component.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       component.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      component.supplier?.toLowerCase().includes(searchTerm.toLowerCase());
+      component.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      component.brand?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesType = typeFilter === "all" || component.type.toLowerCase() === typeFilter.toLowerCase();
+    const matchesType = typeFilter === "all" || component.type === typeFilter;
     
     const matchesStock = 
       stockFilter === "all" ||
@@ -268,15 +272,15 @@ export default function Inventory() {
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="cpu">CPU</SelectItem>
-                <SelectItem value="gpu">GPU</SelectItem>
-                <SelectItem value="memory">Memory</SelectItem>
-                <SelectItem value="storage">Storage</SelectItem>
-                <SelectItem value="motherboard">Motherboard</SelectItem>
-                <SelectItem value="power supply">Power Supply</SelectItem>
-                <SelectItem value="case">Case</SelectItem>
-                <SelectItem value="cooling">Cooling</SelectItem>
+                <SelectItem value="all">Tous Types</SelectItem>
+                <SelectItem value="CPU">CPU</SelectItem>
+                <SelectItem value="GPU">GPU</SelectItem>
+                <SelectItem value="Memory">Memory</SelectItem>
+                <SelectItem value="Storage">Storage</SelectItem>
+                <SelectItem value="Motherboard">Motherboard</SelectItem>
+                <SelectItem value="Power Supply">Power Supply</SelectItem>
+                <SelectItem value="Case">Case</SelectItem>
+                <SelectItem value="Cooling">Cooling</SelectItem>
               </SelectContent>
             </Select>
 
@@ -313,25 +317,37 @@ export default function Inventory() {
                       {getStockBadge(component)}
                     </div>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-gray-600">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 text-sm text-gray-600">
+                      <p>
+                        <span className="font-medium">Référence:</span> {component.reference}
+                      </p>
                       <p>
                         <span className="font-medium">Type:</span> {component.type}
                       </p>
                       <p>
-                        <span className="font-medium">Stock:</span> {component.stockQuantity} units
+                        <span className="font-medium">Stock:</span> {component.stockQuantity} unités
                       </p>
                       <p>
-                        <span className="font-medium">Min Level:</span> {component.minStockLevel}
+                        <span className="font-medium">Niveau Min:</span> {component.minStockLevel}
                       </p>
                       <p>
-                        <span className="font-medium">Price:</span> ${component.price}
+                        <span className="font-medium">Prix:</span> €{component.price}
                       </p>
                     </div>
                     
-                    {component.supplier && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        <span className="font-medium">Supplier:</span> {component.supplier}
-                      </p>
+                    {(component.brand || component.location) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600 mt-2">
+                        {component.brand && (
+                          <p>
+                            <span className="font-medium">Marque:</span> {component.brand}
+                          </p>
+                        )}
+                        {component.location && (
+                          <p>
+                            <span className="font-medium">Emplacement:</span> {component.location}
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
 
@@ -427,11 +443,13 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
   const [formData, setFormData] = useState({
     name: '',
     type: '',
+    brand: '',
+    model: '',
     stockQuantity: 0,
     minStockLevel: 5,
     price: '',
-    supplier: '',
-    description: ''
+    location: '',
+    specifications: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -505,21 +523,42 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
         />
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="brand">Marque</Label>
+          <Input
+            id="brand"
+            value={formData.brand}
+            onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
+          />
+        </div>
+        <div>
+          <Label htmlFor="model">Modèle</Label>
+          <Input
+            id="model"
+            value={formData.model}
+            onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
+          />
+        </div>
+      </div>
+
       <div>
-        <Label htmlFor="supplier">Supplier</Label>
+        <Label htmlFor="location">Emplacement</Label>
         <Input
-          id="supplier"
-          value={formData.supplier}
-          onChange={(e) => setFormData(prev => ({ ...prev, supplier: e.target.value }))}
+          id="location"
+          value={formData.location}
+          onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+          placeholder="Ex: A1-B2, Entrepôt Nord"
         />
       </div>
 
       <div>
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="specifications">Spécifications</Label>
         <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          id="specifications"
+          value={formData.specifications}
+          onChange={(e) => setFormData(prev => ({ ...prev, specifications: e.target.value }))}
+          placeholder="Caractéristiques techniques du composant"
         />
       </div>
 

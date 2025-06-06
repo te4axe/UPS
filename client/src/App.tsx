@@ -35,6 +35,7 @@ function Router() {
 
   return (
     <Layout>
+      <Notifications />
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/orders" component={Orders} />
@@ -45,7 +46,6 @@ function Router() {
         )}
         <Route component={NotFound} />
       </Switch>
-      <Notifications />
     </Layout>
   );
 }
