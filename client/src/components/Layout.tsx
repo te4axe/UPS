@@ -123,14 +123,18 @@ export default function Layout({ children }: LayoutProps) {
           </div>
           
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="w-5 h-5" />
-              <Badge className="absolute -top-1 -right-1 w-3 h-3 p-0 bg-red-500 text-white text-xs">
-                3
-              </Badge>
-            </Button>
-            
             <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600">
+                {user?.firstName} {user?.lastName}
+              </span>
+              <Badge variant="secondary" className="text-xs">
+                {user?.role === 'admin' ? 'Administrateur' :
+                 user?.role === 'receptionist' ? 'Réceptionnaire' :
+                 user?.role === 'components' ? 'Responsable Composants' :
+                 user?.role === 'assembly' ? 'Employé Montage' :
+                 user?.role === 'packaging' ? 'Employé Emballage' :
+                 user?.role === 'shipping' ? 'Expéditeur' : user?.role}
+              </Badge>
               <div className="w-8 h-8 bg-sky-blue-500 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
                   {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
