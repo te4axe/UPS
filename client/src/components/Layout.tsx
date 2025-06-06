@@ -29,7 +29,7 @@ export default function Layout({ children }: LayoutProps) {
     { name: "Vue d'ensemble", href: "/", icon: LayoutDashboard, roles: ["admin", "receptionist", "components", "assembly", "packaging", "shipping"] },
     { name: "Gestion des Commandes", href: "/orders", icon: ShoppingCart, roles: ["admin", "receptionist", "components", "assembly", "packaging", "shipping"] },
     { name: "Gestion des Utilisateurs", href: "/users", icon: Users, roles: ["admin"] },
-    { name: "Inventaire", href: "/inventory", icon: Package, roles: ["admin", "components"] },
+    { name: "Inventaire", href: "/inventory", icon: Package, roles: ["admin", "components", "receptionist"] },
     { name: "Rapports", href: "/reports", icon: BarChart3, roles: ["admin"] },
   ];
 

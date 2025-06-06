@@ -35,6 +35,7 @@ interface Order {
 
 interface Component {
   id: number;
+  reference: string;
   name: string;
   type: string;
   brand?: string;
@@ -42,6 +43,7 @@ interface Component {
   price: string;
   stockQuantity: number;
   minStockLevel?: number;
+  location?: string;
   specifications?: any;
 }
 
@@ -401,7 +403,7 @@ function ComponentSearch({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ FIXED: Proper authentication token handling
+  // Recherche de composants avec authentification par session
   const searchComponents = async (term: string) => {
     if (!term.trim() || term.length < 1) {
       setComponents([]);
@@ -412,17 +414,11 @@ function ComponentSearch({
     setError(null);
 
     try {
-      console.log('🔍 Searching for:', term);
-      
-      // ✅ FIXED: Try both possible token names
-      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Please log in again - no authentication token found');
-      }
+      console.log('Recherche pour:', term);
 
       const response = await fetch(`/api/components?search=${encodeURIComponent(term)}`, {
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         }
       });

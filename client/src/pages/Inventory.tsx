@@ -164,7 +164,7 @@ export default function Inventory() {
   };
 
   // Check if user has inventory management permissions
-  const canManageInventory = user?.role === 'admin' || user?.role === 'components';
+  const canManageInventory = user?.role === 'admin' || user?.role === 'components' || user?.role === 'receptionist';
 
   if (!user) return null;
 
