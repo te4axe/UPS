@@ -474,7 +474,7 @@ function ComponentSearch({
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
         <Input
-          placeholder="Search components (try 'nvidia', 'intel', 'cpu', 'gpu')..."
+          placeholder="Rechercher par nom ou référence (ex: 'RTX 4080', 'CPU-001', 'Intel')..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
@@ -496,23 +496,23 @@ function ComponentSearch({
           {isLoading ? (
             <div className="p-4 text-center text-gray-500">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mx-auto mb-2"></div>
-              Searching components...
+              Recherche en cours...
             </div>
           ) : error ? (
             <div className="p-4 text-center text-red-500">
-              <p className="font-medium">Search Error:</p>
+              <p className="font-medium">Erreur de recherche:</p>
               <p className="text-sm">{error}</p>
               <button 
                 onClick={() => searchComponents(searchTerm)}
                 className="mt-2 text-blue-600 hover:text-blue-800 text-sm underline"
               >
-                Try Again
+                Réessayer
               </button>
             </div>
           ) : components && components.length > 0 ? (
             <div>
               <div className="px-3 py-2 bg-gray-50 border-b text-sm text-gray-600">
-                Found {components.length} component(s)
+                {components.length} composant(s) trouvé(s)
               </div>
               {components.map((component) => (
                 <div
@@ -532,15 +532,18 @@ function ComponentSearch({
                         {component.model && `${component.model}`}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
-                        Stock: {component.stockQuantity} units
+                        <span className="font-medium">Référence:</span> {component.reference}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Stock: {component.stockQuantity} unités
                         {component.stockQuantity <= (component.minStockLevel || 5) && (
-                          <span className="ml-2 text-red-600 font-medium">Low Stock!</span>
+                          <span className="ml-2 text-red-600 font-medium">Stock faible!</span>
                         )}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-green-600">${component.price}</p>
-                      <p className="text-xs text-gray-500">per unit</p>
+                      <p className="font-semibold text-green-600">€{component.price}</p>
+                      <p className="text-xs text-gray-500">par unité</p>
                     </div>
                   </div>
                 </div>
@@ -548,11 +551,11 @@ function ComponentSearch({
             </div>
           ) : searchTerm.length >= 1 ? (
             <div className="p-4 text-center text-gray-500">
-              <p>No components found matching "{searchTerm}"</p>
+              <p>Aucun composant trouvé pour "{searchTerm}"</p>
               <div className="mt-2 text-sm">
-                <p>Try searching for:</p>
+                <p>Essayez de chercher:</p>
                 <div className="flex flex-wrap gap-2 mt-2 justify-center">
-                  {['nvidia', 'intel', 'cpu', 'gpu', 'ram', 'ssd'].map(term => (
+                  {['CPU', 'GPU', 'Memory', 'Storage', 'RTX', 'Intel'].map(term => (
                     <button
                       key={term}
                       onClick={() => setSearchTerm(term)}

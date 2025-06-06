@@ -328,27 +328,12 @@ export default function Inventory() {
                         <span className="font-medium">Stock:</span> {component.stockQuantity} unités
                       </p>
                       <p>
-                        <span className="font-medium">Niveau Min:</span> {component.minStockLevel}
-                      </p>
-                      <p>
                         <span className="font-medium">Prix:</span> €{component.price}
                       </p>
+                      <p>
+                        <span className="font-medium">Emplacement:</span> {component.location || 'Non défini'}
+                      </p>
                     </div>
-                    
-                    {(component.brand || component.location) && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600 mt-2">
-                        {component.brand && (
-                          <p>
-                            <span className="font-medium">Marque:</span> {component.brand}
-                          </p>
-                        )}
-                        {component.location && (
-                          <p>
-                            <span className="font-medium">Emplacement:</span> {component.location}
-                          </p>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   {canManageInventory && (
