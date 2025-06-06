@@ -164,9 +164,24 @@ export default function Inventory() {
   };
 
   // Check if user has inventory management permissions
-  const canManageInventory = user?.role === 'admin' || user?.role === 'components' || user?.role === 'receptionist';
+  const canManageInventory = user?.role === 'admin' || user?.role === 'stock_manager';
+  const canViewInventory = user?.role === 'admin' || user?.role === 'stock_manager' || user?.role === 'receptionist';
 
   if (!user) return null;
+  
+  // Restrict access - only admin, stock_manager, and receptionist can view inventory
+  if (!canViewInventory) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <Card>
+          <CardContent className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Accès non autorisé</h3>
+            <p className="text-gray-600">Vous n'avez pas les permissions pour accéder à l'inventaire.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto">

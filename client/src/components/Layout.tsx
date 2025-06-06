@@ -3,6 +3,11 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { 
   Cpu, 
   Menu, 
@@ -13,8 +18,12 @@ import {
   Package, 
   BarChart3,
   LogOut,
-  Bell
+  Bell,
+  Key,
+  User,
+  ChevronDown
 } from "lucide-react";
+import Notifications from "./Notifications";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -22,14 +31,24 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [location] = useLocation();
   const { user, logout } = useAuth();
+  const { toast } = useToast();
+
+  const { data: notifications } = useQuery({
+    queryKey: ["/api/notifications"],
+    refetchInterval: 30000,
+  });
+
+  const unreadCount = notifications?.filter((n: any) => !n.isRead).length || 0;
 
   const navigation = [
-    { name: "Vue d'ensemble", href: "/", icon: LayoutDashboard, roles: ["admin", "receptionist", "components", "assembly", "packaging", "shipping"] },
-    { name: "Gestion des Commandes", href: "/orders", icon: ShoppingCart, roles: ["admin", "receptionist", "components", "assembly", "packaging", "shipping"] },
+    { name: "Vue d'ensemble", href: "/", icon: LayoutDashboard, roles: ["admin", "receptionist", "stock_manager", "assembly", "packaging", "shipping"] },
+    { name: "Gestion des Commandes", href: "/orders", icon: ShoppingCart, roles: ["admin", "receptionist", "stock_manager", "assembly", "packaging", "shipping"] },
     { name: "Gestion des Utilisateurs", href: "/users", icon: Users, roles: ["admin"] },
-    { name: "Inventaire", href: "/inventory", icon: Package, roles: ["admin", "components", "receptionist"] },
+    { name: "Inventaire", href: "/inventory", icon: Package, roles: ["admin", "stock_manager", "receptionist"] },
     { name: "Rapports", href: "/reports", icon: BarChart3, roles: ["admin"] },
   ];
 
@@ -39,6 +58,62 @@ export default function Layout({ children }: LayoutProps) {
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handlePasswordChange = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast({
+        title: "Erreur",
+        description: "Les mots de passe ne correspondent pas",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast({
+        title: "Erreur",
+        description: "Le mot de passe doit contenir au moins 6 caractères",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Succès",
+          description: "Mot de passe modifié avec succès",
+        });
+        setPasswordDialogOpen(false);
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        const error = await response.text();
+        toast({
+          title: "Erreur",
+          description: error || "Impossible de modifier le mot de passe",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Erreur de connexion",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
