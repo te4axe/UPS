@@ -623,7 +623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/components', authenticateToken, requireRole(['admin', 'components']), async (req, res) => {
+  app.post('/api/components', authenticateToken, requireRole(['admin', 'stock_manager']), async (req, res) => {
     try {
       const componentData = insertComponentSchema.parse(req.body);
       const component = await storage.createComponent(componentData);
@@ -634,8 +634,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update component route
+  app.patch('/api/components/:id', authenticateToken, requireRole(['admin', 'stock_manager']), async (req, res) => {
+    try {
+      const componentId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      // Get current component
+      const currentComponent = await storage.getComponent(componentId);
+      if (!currentComponent) {
+        return res.status(404).json({ message: "Component not found" });
+      }
+      
+      // Update the component
+      const updatedComponent = await storage.updateComponent(componentId, updates);
+      res.json(updatedComponent);
+    } catch (error) {
+      console.error('Update component error:', error);
+      res.status(400).json({ message: "Failed to update component" });
+    }
+  });
+
+  // Update component stock route
+  app.patch('/api/components/:id/stock', authenticateToken, requireRole(['admin', 'stock_manager']), async (req, res) => {
+    try {
+      const componentId = parseInt(req.params.id);
+      const { quantity } = req.body;
+      
+      if (typeof quantity !== 'number' || quantity < 0) {
+        return res.status(400).json({ message: "Valid quantity required" });
+      }
+      
+      const updatedComponent = await storage.updateComponentStock(componentId, quantity);
+      res.json(updatedComponent);
+    } catch (error) {
+      console.error('Update component stock error:', error);
+      res.status(400).json({ message: "Failed to update component stock" });
+    }
+  });
+
   // Order components routes
-  app.post('/api/orders/:id/components', authenticateToken, requireRole(['admin', 'components']), async (req, res) => {
+  app.post('/api/orders/:id/components', authenticateToken, requireRole(['admin', 'stock_manager']), async (req, res) => {
     try {
       const orderId = parseInt(req.params.id);
       const { componentId, quantity, priceAtTime } = req.body;

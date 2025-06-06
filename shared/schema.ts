@@ -90,9 +90,7 @@ export const orders = pgTable("orders", {
   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
   specifications: jsonb("specifications"), // Custom PC specs
   notes: text("notes"),
-  shippingAddress: text("shipping_address"),
   trackingNumber: text("tracking_number"),
-  estimatedDelivery: timestamp("estimated_delivery"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
