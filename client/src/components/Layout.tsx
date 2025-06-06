@@ -42,7 +42,7 @@ export default function Layout({ children }: LayoutProps) {
     refetchInterval: 30000,
   });
 
-  const unreadCount = notifications?.filter((n: any) => !n.isRead).length || 0;
+  const unreadCount = Array.isArray(notifications) ? notifications.filter((n: any) => !n.isRead).length : 0;
 
   const navigation = [
     { name: "Vue d'ensemble", href: "/", icon: LayoutDashboard, roles: ["admin", "receptionist", "stock_manager", "assembly", "packaging", "shipping"] },
@@ -198,23 +198,96 @@ export default function Layout({ children }: LayoutProps) {
           </div>
           
           <div className="flex items-center space-x-4">
+            {/* Notifications */}
+            <div className="relative">
+              <Button variant="ghost" size="sm" className="relative">
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-1 -right-1 h-5 w-5 text-xs p-0 flex items-center justify-center"
+                  >
+                    {unreadCount}
+                  </Badge>
+                )}
+              </Button>
+            </div>
+
+            {/* User Menu */}
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">
-                {user?.firstName} {user?.lastName}
-              </span>
-              <Badge variant="secondary" className="text-xs">
-                {user?.role === 'admin' ? 'Administrateur' :
-                 user?.role === 'receptionist' ? 'Réceptionnaire' :
-                 user?.role === 'components' ? 'Responsable Composants' :
-                 user?.role === 'assembly' ? 'Employé Montage' :
-                 user?.role === 'packaging' ? 'Employé Emballage' :
-                 user?.role === 'shipping' ? 'Expéditeur' : user?.role}
-              </Badge>
-              <div className="w-8 h-8 bg-sky-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
-                  {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
-                </span>
+              <div className="text-right">
+                <div className="text-sm font-medium text-gray-900">
+                  {user?.firstName} {user?.lastName}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {user?.role === 'admin' ? 'Administrateur' :
+                   user?.role === 'receptionist' ? 'Réceptionnaire' :
+                   user?.role === 'stock_manager' ? 'Gestionnaire Stock' :
+                   user?.role === 'assembly' ? 'Employé Montage' :
+                   user?.role === 'packaging' ? 'Employé Emballage' :
+                   user?.role === 'shipping' ? 'Expéditeur' : user?.role}
+                </div>
               </div>
+              
+              <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-sky-blue-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-medium">
+                        {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                      </span>
+                    </div>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Changer le mot de passe</DialogTitle>
+                    <DialogDescription>
+                      Modifiez votre mot de passe actuel
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="current-password">Mot de passe actuel</Label>
+                      <Input
+                        id="current-password"
+                        type="password"
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="new-password">Nouveau mot de passe</Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      />
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button onClick={handlePasswordChange} className="flex-1">
+                        <Key className="w-4 h-4 mr-2" />
+                        Modifier
+                      </Button>
+                      <Button variant="outline" onClick={handleLogout}>
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Déconnexion
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </header>

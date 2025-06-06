@@ -184,6 +184,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Change password route
+  app.post('/api/auth/change-password', authenticateToken, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: 'Non connecté' });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).send('Mot de passe actuel et nouveau mot de passe requis');
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).send('Le nouveau mot de passe doit contenir au moins 6 caractères');
+      }
+
+      // Get current user
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).send('Utilisateur non trouvé');
+      }
+
+      // Verify current password
+      const bcrypt = require('bcrypt');
+      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).send('Mot de passe actuel incorrect');
+      }
+
+      // Hash new password
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update password
+      await storage.updateUser(req.user.id, { password: hashedNewPassword });
+      
+      res.json({ message: 'Mot de passe modifié avec succès' });
+    } catch (error) {
+      console.error('Change password error:', error);
+      res.status(500).send('Erreur lors du changement de mot de passe');
+    }
+  });
+
   app.post('/api/auth/logout', authenticateToken, async (req, res) => {
     try {
       req.session.destroy((err) => {
