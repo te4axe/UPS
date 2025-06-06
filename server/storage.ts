@@ -54,6 +54,7 @@ export interface IStorage {
   getComponentsByType(type: string): Promise<Component[]>;
   searchComponents(searchTerm: string): Promise<Component[]>;
   createComponent(component: InsertComponent): Promise<Component>;
+  updateComponent(id: number, updates: Partial<InsertComponent>): Promise<Component>;
   updateComponentStock(id: number, quantity: number): Promise<Component>;
   getLowStockComponents(): Promise<Component[]>;
 
@@ -356,6 +357,20 @@ export class DatabaseStorage implements IStorage {
       return component;
     } catch (error) {
       console.error('Error creating component:', error);
+      throw error;
+    }
+  }
+
+  async updateComponent(id: number, updates: Partial<InsertComponent>): Promise<Component> {
+    try {
+      const [component] = await db
+        .update(components)
+        .set(updates)
+        .where(eq(components.id, id))
+        .returning();
+      return component;
+    } catch (error) {
+      console.error('Error updating component:', error);
       throw error;
     }
   }

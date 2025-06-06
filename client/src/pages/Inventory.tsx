@@ -45,6 +45,7 @@ export default function Inventory() {
   const [selectedComponent, setSelectedComponent] = useState<Component | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isStockUpdateOpen, setIsStockUpdateOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [stockAdjustment, setStockAdjustment] = useState({ quantity: 0, notes: "" });
 
   const { data: components, isLoading } = useQuery<Component[]>({
@@ -151,6 +152,11 @@ export default function Inventory() {
   const handleStockUpdate = (component: Component) => {
     setSelectedComponent(component);
     setIsStockUpdateOpen(true);
+  };
+
+  const handleComponentEdit = (component: Component) => {
+    setSelectedComponent(component);
+    setIsEditDialogOpen(true);
   };
 
   const submitStockUpdate = () => {
@@ -360,7 +366,16 @@ export default function Inventory() {
                         className="w-full sm:w-auto"
                       >
                         <Edit className="h-4 w-4 mr-2" />
-                        Update Stock
+                        Modifier Stock
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleComponentEdit(component)}
+                        className="w-full sm:w-auto"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Modifier Infos
                       </Button>
                     </div>
                   )}
