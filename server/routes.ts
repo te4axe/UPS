@@ -19,6 +19,8 @@ interface AuthenticatedRequest extends Express.Request {
     id: number;
     email: string;
     role: string;
+    firstName?: string;
+    lastName?: string;
   };
 }
 
@@ -52,6 +54,25 @@ function requireRole(roles: string[]) {
   };
 }
 
+// Helper functions for address parsing
+function extractCityFromAddress(address: string): string | null {
+  if (!address) return null;
+  const parts = address.split(',');
+  return parts.length >= 2 ? parts[parts.length - 2].trim() : null;
+}
+
+function extractStateFromAddress(address: string): string | null {
+  if (!address) return null;
+  const parts = address.split(',');
+  return parts.length >= 1 ? parts[parts.length - 1].trim().split(' ')[0] : null;
+}
+
+function extractZipFromAddress(address: string): string | null {
+  if (!address) return null;
+  const zipMatch = address.match(/\b\d{5}\b/);
+  return zipMatch ? zipMatch[0] : null;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // WebSocket setup for real-time notifications
   const httpServer = createServer(app);
@@ -60,11 +81,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const clients = new Map<number, WebSocket>();
 
   wss.on('connection', (ws) => {
+    console.log('New WebSocket connection established');
+
     ws.on('message', (message) => {
       try {
         const data = JSON.parse(message.toString());
         if (data.type === 'auth' && data.userId) {
           clients.set(data.userId, ws);
+          console.log(`User ${data.userId} authenticated via WebSocket`);
         }
       } catch (error) {
         console.error('WebSocket message error:', error);
@@ -76,6 +100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const [userId, client] of clients.entries()) {
         if (client === ws) {
           clients.delete(userId);
+          console.log(`User ${userId} disconnected from WebSocket`);
           break;
         }
       }
@@ -102,27 +127,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post('/api/auth/login', async (req, res) => {
     try {
+      console.log('Login attempt for:', req.body.email);
       const { email, password } = loginSchema.parse(req.body);
       
       const user = await storage.getUserByEmail(email);
       if (!user) {
+        console.log('User not found:', email);
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       const validPassword = await bcrypt.compare(password, user.password);
       if (!validPassword) {
+        console.log('Invalid password for user:', email);
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       if (!user.isActive) {
+        console.log('Account disabled for user:', email);
         return res.status(401).json({ message: "Account is disabled" });
       }
 
       const token = jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
+        { 
+          id: user.id, 
+          email: user.email, 
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName
+        },
         JWT_SECRET,
         { expiresIn: '24h' }
       );
+
+      console.log('Login successful for:', email, 'Role:', user.role);
 
       res.json({
         token,
@@ -216,6 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Order management routes
   app.get('/api/orders', authenticateToken, async (req: AuthenticatedRequest, res) => {
     try {
+      console.log(`Fetching orders for user ${req.user!.id} with role ${req.user!.role}`);
       let orders;
       
       if (req.user!.role === 'customer') {
@@ -229,6 +267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      console.log(`Retrieved ${orders.length} orders`);
       res.json(orders);
     } catch (error) {
       console.error('Get orders error:', error);
@@ -260,40 +299,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/orders', authenticateToken, requireRole(['admin', 'receptionist']), async (req, res) => {
+  // POST /api/orders - Create order with multiple components
+  app.post('/api/orders', authenticateToken, requireRole(['admin', 'receptionist']), async (req: AuthenticatedRequest, res) => {
     try {
-      const orderData = insertOrderSchema.parse(req.body);
+      console.log('📦 Creating new order with data:', req.body);
       
-      // Generate order number
-      const orderNumber = `PC-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      const { 
+        customerEmail, 
+        customerFirstName, 
+        customerLastName, 
+        customerPhone,
+        selectedComponents, // Array of components with quantities
+        totalAmount, 
+        notes, 
+        shippingAddress 
+      } = req.body;
       
-      const order = await storage.createOrder({
-        ...orderData,
+      // ✅ FIXED: Better validation with clearer error messages
+      if (!customerFirstName || !customerLastName || !customerEmail || !shippingAddress) {
+        console.log('❌ Missing required fields');
+        return res.status(400).json({ 
+          message: "Missing required fields: firstName, lastName, email, shippingAddress" 
+        });
+      }
+
+      // ✅ FIXED: Require components for new orders
+      if (!selectedComponents || !Array.isArray(selectedComponents) || selectedComponents.length === 0) {
+        return res.status(400).json({ 
+          message: "At least one component must be selected from inventory" 
+        });
+      }
+
+      // ✅ FIXED: Better component validation
+      for (const comp of selectedComponents) {
+        if (!comp.id || !comp.quantity || comp.quantity <= 0 || !comp.price) {
+          return res.status(400).json({ 
+            message: "Invalid component data: each component must have id, quantity > 0, and price" 
+          });
+        }
+      }
+
+      // ✅ FIXED: Calculate total from components (more accurate)
+      const calculatedTotal = selectedComponents.reduce((sum, comp) => 
+        sum + (parseFloat(comp.price) * comp.quantity), 0);
+      
+      const orderTotalAmount = totalAmount ? parseFloat(totalAmount) : calculatedTotal;
+
+      // ✅ FIXED: Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(customerEmail)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+
+      // ✅ FIXED: Validate amount
+      if (isNaN(orderTotalAmount) || orderTotalAmount <= 0) {
+        return res.status(400).json({ message: "Invalid total amount" });
+      }
+
+      // Check if customer exists, if not create new one
+      let customer;
+      try {
+        customer = await storage.getCustomerByEmail(customerEmail.toLowerCase());
+      } catch (error) {
+        customer = null;
+      }
+      
+      let customerId;
+      
+      if (customer) {
+        customerId = customer.id;
+        console.log('✅ Found existing customer:', customer.email);
+        
+        // Update customer info if provided
+        await storage.updateCustomer(customer.id, {
+          firstName: customerFirstName,
+          lastName: customerLastName,
+          phone: customerPhone,
+          address: shippingAddress,
+        });
+        
+      } else {
+        console.log('🆕 Creating new customer:', customerEmail);
+        
+        // Create new customer
+        const newCustomer = await storage.createCustomer({
+          firstName: customerFirstName,
+          lastName: customerLastName,
+          email: customerEmail.toLowerCase(),
+          phone: customerPhone || null,
+          address: shippingAddress,
+          city: extractCityFromAddress(shippingAddress),
+          state: extractStateFromAddress(shippingAddress),
+          zipCode: extractZipFromAddress(shippingAddress),
+        });
+        
+        customerId = newCustomer.id;
+      }
+      
+      // Generate unique order number
+      const orderNumber = `UPC-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      
+      console.log('🏗️ Creating order:', orderNumber);
+      
+      // ✅ FIXED: Better specifications structure
+      const componentsSpecs = selectedComponents.map(comp => ({
+        id: comp.id,
+        name: comp.name,
+        quantity: comp.quantity,
+        price: parseFloat(comp.price),
+        type: comp.type,
+        brand: comp.brand || null,
+        model: comp.model || null,
+        subtotal: parseFloat(comp.price) * comp.quantity
+      }));
+      
+      const orderSpecs = {
+        components: componentsSpecs,
+        componentCount: selectedComponents.length,
+        customBuild: true,
+        totalCalculated: calculatedTotal
+      };
+      
+      // Create the order
+      const orderData = {
         orderNumber,
-        status: 'created',
-      });
+        customerId: customerId,
+        productId: null, // Always null for component-based orders
+        totalAmount: orderTotalAmount.toFixed(2),
+        specifications: orderSpecs,
+        notes: notes || null,
+        shippingAddress: shippingAddress,
+        status: 'created' as const,
+      };
+      
+      const order = await storage.createOrder(orderData);
+
+      // ✅ FIXED: Add each component to order_components table
+      for (const comp of selectedComponents) {
+        await storage.addOrderComponent({
+          orderId: order.id,
+          componentId: comp.id,
+          quantity: comp.quantity,
+          priceAtTime: parseFloat(comp.price),
+          selectedBy: req.user!.id,
+        });
+      }
 
       // Create initial status history
       await storage.addOrderStatusHistory({
         orderId: order.id,
         status: 'created',
         changedBy: req.user!.id,
-        notes: 'Order created',
+        notes: `Order created with ${selectedComponents.length} components by ${req.user!.firstName || req.user!.role}`,
       });
+
+      console.log('✅ Order created successfully:', order.id);
 
       // Notify relevant users
       const notification = {
         type: 'order_created',
-        title: 'New Order Created',
-        message: `Order ${orderNumber} has been created`,
+        title: 'New Custom Order Created',
+        message: `Order ${orderNumber} has been created with ${selectedComponents.length} components by ${req.user!.firstName || req.user!.role}`,
         orderId: order.id,
       };
-      broadcastToRoles(['admin', 'receptionist'], notification);
+      broadcastToRoles(['admin', 'components'], notification);
 
-      res.status(201).json(order);
+      res.status(201).json({
+        message: "Order created successfully",
+        order: order,
+        customerId: customerId,
+        componentsCount: selectedComponents.length
+      });
+      
     } catch (error) {
-      console.error('Create order error:', error);
-      res.status(400).json({ message: "Failed to create order" });
+      console.error('❌ Create order error:', error);
+      res.status(500).json({ 
+        message: "Failed to create order", 
+        error: error.message 
+      });
     }
   });
 
@@ -301,6 +484,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const orderId = parseInt(req.params.id);
       const { status, notes } = req.body;
+
+      console.log(`🔄 Updating order ${orderId} status to ${status} by ${req.user!.role}`);
 
       if (!ORDER_STATUSES.includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
@@ -323,55 +508,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = await storage.updateOrderStatus(orderId, status, req.user!.id, notes);
 
+      console.log(`✅ Order ${orderId} status updated to ${status}`);
+
       // Create notification for status change
       const notification = {
         type: 'status_changed',
         title: 'Order Status Updated',
-        message: `Order ${order.orderNumber} status changed to ${status}`,
+        message: `Order ${order.orderNumber} status changed to ${status.replace('_', ' ')}`,
         orderId: order.id,
       };
 
       // Notify customer and relevant staff
       if (order.customerId) {
-        await storage.createNotification({
-          userId: order.customerId,
-          title: notification.title,
-          message: notification.message,
-          type: 'info',
-          relatedOrderId: order.id,
-        });
-        broadcastToUser(order.customerId, notification);
+        try {
+          await storage.createNotification({
+            userId: order.customerId,
+            title: notification.title,
+            message: notification.message,
+            type: 'info',
+            relatedOrderId: order.id,
+          });
+          broadcastToUser(order.customerId, notification);
+        } catch (notifError) {
+          console.error('Error creating notification:', notifError);
+        }
       }
 
       broadcastToRoles(['admin'], notification);
 
-      res.json(order);
+      res.json({
+        message: "Order status updated successfully",
+        order: order
+      });
     } catch (error) {
       console.error('Update order status error:', error);
       res.status(500).json({ message: "Failed to update order status" });
     }
   });
 
-  // Component management routes
+  // ✅ ENHANCED: Component management routes with better error handling
   app.get('/api/components', authenticateToken, async (req, res) => {
     try {
-      const { type } = req.query;
+      const { type, search } = req.query;
+      console.log(`🔍 Components API called: type=${type}, search=${search}`);
+      
       let components;
       
-      if (type && typeof type === 'string') {
+      if (search && typeof search === 'string' && search.trim()) {
+        console.log(`🔍 Searching components with term: "${search}"`);
+        components = await storage.searchComponents(search.trim());
+      } else if (type && typeof type === 'string') {
+        console.log(`🔍 Getting components by type: "${type}"`);
         components = await storage.getComponentsByType(type);
       } else {
+        console.log('🔍 Getting all components');
         components = await storage.getAllComponents();
       }
 
+      console.log(`📦 API returning ${components.length} components`);
       res.json(components);
+      
     } catch (error) {
-      console.error('Get components error:', error);
-      res.status(500).json({ message: "Failed to fetch components" });
+      console.error('❌ Get components error:', error);
+      res.status(500).json({ 
+        message: "Failed to fetch components",
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      });
     }
   });
 
-  app.post('/api/components', authenticateToken, requireRole(['admin']), async (req, res) => {
+  app.post('/api/components', authenticateToken, requireRole(['admin', 'components']), async (req, res) => {
     try {
       const componentData = insertComponentSchema.parse(req.body);
       const component = await storage.createComponent(componentData);
@@ -400,6 +606,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Add order component error:', error);
       res.status(400).json({ message: "Failed to add component to order" });
+    }
+  });
+
+  // Get components for specific order
+  app.get('/api/orders/:id/components', authenticateToken, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const components = await storage.getOrderComponents(orderId);
+      res.json(components);
+    } catch (error) {
+      console.error('Get order components error:', error);
+      res.status(500).json({ message: "Failed to fetch order components" });
     }
   });
 
@@ -468,16 +686,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Products routes
+  // ✅ FIXED: Products routes - Return empty array to force frontend to use components
   app.get('/api/products', authenticateToken, async (req, res) => {
     try {
-      const products = await storage.getAllProducts();
-      res.json(products);
+      console.log('⚠️ Products API called - redirecting to components');
+      // Return empty array to force frontend to use /api/components instead
+      res.json([]);
     } catch (error) {
       console.error('Get products error:', error);
       res.status(500).json({ message: "Failed to fetch products" });
     }
   });
 
+  console.log('🚀 All routes registered successfully');
   return httpServer;
 }
