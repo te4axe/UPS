@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -6,14 +6,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, Cpu } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login } = useAuth();
+  const { login, user, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
+
+  // Redirection automatique si l'utilisateur est déjà connecté
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setLocation("/");
+    }
+  }, [isAuthenticated, user, setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,13 +31,14 @@ export default function Login() {
     try {
       await login({ email, password });
       toast({
-        title: "Welcome back!",
-        description: "You have been logged in successfully.",
+        title: "Connexion réussie",
+        description: "Vous êtes maintenant connecté.",
       });
+      // La redirection sera gérée par l'effet useEffect ci-dessus
     } catch (error) {
       toast({
-        title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        title: "Échec de la connexion",
+        description: "Email ou mot de passe invalide. Veuillez réessayer.",
         variant: "destructive",
       });
     } finally {
@@ -44,13 +54,13 @@ export default function Login() {
             <Cpu className="w-8 h-8 text-white" />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">Ultra PC</CardTitle>
-          <CardDescription>Order Management System</CardDescription>
+          <CardDescription>Système de Gestion des Commandes</CardDescription>
         </CardHeader>
         
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">Adresse Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -63,7 +73,7 @@ export default function Login() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Mot de Passe</Label>
               <Input
                 id="password"
                 type="password"
@@ -83,10 +93,10 @@ export default function Login() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Signing In...
+                  Connexion...
                 </>
               ) : (
-                "Sign In"
+                "Se Connecter"
               )}
             </Button>
           </form>

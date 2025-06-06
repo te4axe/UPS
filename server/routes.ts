@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import session from "express-session";
 import { z } from "zod";
 import { storage } from "./storage";
 import { 
@@ -14,6 +14,20 @@ import {
   ORDER_STATUSES
 } from "@shared/schema";
 
+// Étendre le type de session pour inclure les données utilisateur
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+    user?: {
+      id: number;
+      email: string;
+      role: string;
+      firstName: string;
+      lastName: string;
+    };
+  }
+}
+
 interface AuthenticatedRequest extends Express.Request {
   user?: {
     id: number;
@@ -24,24 +38,14 @@ interface AuthenticatedRequest extends Express.Request {
   };
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "ultra-pc-secret-key";
-
-// Middleware for JWT authentication
+// Middleware d'authentification basé sur les sessions
 function authenticateToken(req: AuthenticatedRequest, res: Express.Response, next: Express.NextFunction) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "Access token required" });
+  if (!req.session || !req.session.user) {
+    return res.status(401).json({ message: "Non connecté" });
   }
-
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-    if (err) {
-      return res.status(403).json({ message: "Invalid or expired token" });
-    }
-    req.user = user;
-    next();
-  });
+  
+  req.user = req.session.user;
+  next();
 }
 
 // Role-based authorization middleware

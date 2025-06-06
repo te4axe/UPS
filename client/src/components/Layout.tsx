@@ -26,11 +26,11 @@ export default function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuth();
 
   const navigation = [
-    { name: "Dashboard", href: "/", icon: LayoutDashboard, roles: ["admin", "receptionist", "components", "assembly", "packaging", "shipping"] },
-    { name: "Orders", href: "/orders", icon: ShoppingCart, roles: ["admin", "receptionist", "components", "assembly", "packaging", "shipping"] },
-    { name: "User Management", href: "/users", icon: Users, roles: ["admin"] },
-    { name: "Inventory", href: "/inventory", icon: Package, roles: ["admin", "components"] },
-    { name: "Reports", href: "/reports", icon: BarChart3, roles: ["admin"] },
+    { name: "Vue d'ensemble", href: "/", icon: LayoutDashboard, roles: ["admin", "receptionist", "components", "assembly", "packaging", "shipping"] },
+    { name: "Gestion des Commandes", href: "/orders", icon: ShoppingCart, roles: ["admin", "receptionist", "components", "assembly", "packaging", "shipping"] },
+    { name: "Gestion des Utilisateurs", href: "/users", icon: Users, roles: ["admin"] },
+    { name: "Inventaire", href: "/inventory", icon: Package, roles: ["admin", "components"] },
+    { name: "Rapports", href: "/reports", icon: BarChart3, roles: ["admin"] },
   ];
 
   const filteredNavigation = navigation.filter(item => 
@@ -99,7 +99,7 @@ export default function Layout({ children }: LayoutProps) {
             className="w-full justify-start text-gray-700 hover:bg-gray-100"
           >
             <LogOut className="w-5 h-5 mr-3" />
-            Logout
+            Déconnexion
           </Button>
         </div>
       </div>

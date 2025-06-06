@@ -1,6 +1,5 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useState, useEffect } from "react";
 
 interface User {
   id: number;
@@ -15,69 +14,79 @@ interface LoginCredentials {
   password: string;
 }
 
-interface AuthResponse {
-  token: string;
-  user: User;
-}
-
 export function useAuth() {
   const queryClient = useQueryClient();
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem("auth_token");
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
-
+  // Utiliser react-query pour gérer l'état d'authentification
+  const { data: user, isLoading, error } = useQuery({
+    queryKey: ["auth", "user"],
+    queryFn: async () => {
       try {
         const response = await fetch("/api/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: 'include'
         });
-
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-        } else {
-          localStorage.removeItem("auth_token");
+        if (!response.ok) {
+          throw new Error('Non authentifié');
         }
+        return response.json();
       } catch (error) {
-        localStorage.removeItem("auth_token");
-      } finally {
-        setIsLoading(false);
+        throw error;
       }
-    };
-
-    checkAuth();
-  }, []);
+    },
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-      const response = await apiRequest("POST", "/api/auth/login", credentials);
+    mutationFn: async (credentials: LoginCredentials): Promise<User> => {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: 'include',
+        body: JSON.stringify(credentials),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erreur de connexion');
+      }
+
       return response.json();
     },
-    onSuccess: (data) => {
-      localStorage.setItem("auth_token", data.token);
-      setUser(data.user);
+    onSuccess: (userData) => {
+      // Mettre à jour le cache avec les données utilisateur
+      queryClient.setQueryData(["auth", "user"], userData);
+      // Invalider toutes les requêtes pour recharger les données
+      queryClient.invalidateQueries();
     },
   });
 
-  const logout = () => {
-    localStorage.removeItem("auth_token");
-    setUser(null);
-    queryClient.clear();
-  };
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Erreur de déconnexion');
+      }
+    },
+    onSuccess: () => {
+      // Effacer le cache d'authentification
+      queryClient.setQueryData(["auth", "user"], null);
+      queryClient.clear();
+    },
+  });
 
   return {
-    user,
+    user: user || null,
     isLoading,
-    login: loginMutation.mutateAsync,
-    logout,
     isAuthenticated: !!user,
+    login: loginMutation.mutateAsync,
+    logout: logoutMutation.mutateAsync,
+    loginMutation,
+    logoutMutation,
   };
 }
