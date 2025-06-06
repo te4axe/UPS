@@ -66,14 +66,16 @@ export const products = pgTable("products", {
 // Components inventory
 export const components = pgTable("components", {
   id: serial("id").primaryKey(),
+  reference: text("reference").notNull().unique(), // Auto-generated reference like CPU-001, GPU-002, etc.
   name: text("name").notNull(),
-  type: text("type").notNull(), // processor, graphics, memory, storage, motherboard, psu
+  type: text("type").notNull(), // CPU, GPU, Memory, Storage, Motherboard, Power Supply, Case, Cooling
   brand: text("brand"),
   model: text("model"),
   specifications: jsonb("specifications"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   stockQuantity: integer("stock_quantity").default(0),
   minStockLevel: integer("min_stock_level").default(5),
+  location: text("location"), // Storage location in warehouse
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });

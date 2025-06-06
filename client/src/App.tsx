@@ -11,6 +11,7 @@ import Dashboard from "@/pages/Dashboard";
 import Orders from "@/pages/Orders";
 import UserManagement from "@/pages/UserManagement";
 import Inventory from "@/pages/Inventory";
+import Reports from "@/pages/Reports";
 import Layout from "@/components/Layout";
 import Notifications from "@/components/Notifications";
 
@@ -38,6 +39,7 @@ function Router() {
         <Route path="/" component={Dashboard} />
         <Route path="/orders" component={Orders} />
         <Route path="/inventory" component={Inventory} />
+        <Route path="/reports" component={Reports} />
         {user.role === 'admin' && (
           <Route path="/users" component={UserManagement} />
         )}

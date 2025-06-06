@@ -34,7 +34,8 @@ export default function Login() {
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté.",
       });
-      // La redirection sera gérée par l'effet useEffect ci-dessus
+      // Redirection immédiate
+      setLocation("/");
     } catch (error) {
       toast({
         title: "Échec de la connexion",
