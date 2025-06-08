@@ -486,7 +486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           orderId: order.id,
           componentId: comp.id,
           quantity: comp.quantity,
-          priceAtTime: parseFloat(comp.price),
+          priceAtTime: parseFloat(comp.price).toString(),
           selectedBy: req.user!.id,
         });
       }
@@ -634,7 +634,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const componentData = insertComponentSchema.parse(req.body);
+      // Convert numeric fields to strings for decimal validation
+      const requestBody = { ...req.body };
+      if (typeof requestBody.price === 'number') {
+        requestBody.price = requestBody.price.toString();
+      }
+      if (typeof requestBody.stockQuantity === 'number') {
+        requestBody.stockQuantity = parseInt(requestBody.stockQuantity);
+      }
+      if (typeof requestBody.minStockLevel === 'number') {
+        requestBody.minStockLevel = parseInt(requestBody.minStockLevel);
+      }
+      
+      const componentData = insertComponentSchema.parse(requestBody);
       const component = await storage.createComponent(componentData);
       res.status(201).json(component);
     } catch (error) {
@@ -693,11 +705,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderId = parseInt(req.params.id);
       const { componentId, quantity, priceAtTime } = req.body;
 
+      // Convert price to string for decimal validation
+      const requestBody = { ...req.body };
+      if (typeof requestBody.priceAtTime === 'number') {
+        requestBody.priceAtTime = requestBody.priceAtTime.toString();
+      }
+
       const orderComponent = await storage.addOrderComponent({
         orderId,
         componentId,
         quantity,
-        priceAtTime,
+        priceAtTime: requestBody.priceAtTime,
         selectedBy: req.user!.id,
       });
 
