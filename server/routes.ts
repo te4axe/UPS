@@ -651,11 +651,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(component);
     } catch (error) {
       console.error('Create component error:', error);
-      if (error.name === 'ZodError') {
+      console.error('Error details:', {
+        name: error?.name,
+        message: error?.message,
+        stack: error?.stack,
+        code: error?.code
+      });
+      
+      if (error?.name === 'ZodError') {
         const issues = error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(', ');
         res.status(400).json({ message: `Validation error: ${issues}` });
+      } else if (error?.code) {
+        // Database-specific error
+        res.status(500).json({ 
+          message: `Database error: ${error.message}`,
+          code: error.code 
+        });
       } else {
-        res.status(500).json({ message: "Failed to create component" });
+        res.status(500).json({ 
+          message: "Failed to create component",
+          error: error?.message || 'Unknown error'
+        });
       }
     }
   });

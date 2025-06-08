@@ -347,27 +347,45 @@ export class DatabaseStorage implements IStorage {
 
   async createComponent(insertComponent: InsertComponent): Promise<Component> {
     try {
+      console.log('🔧 Creating component with data:', insertComponent);
+      
       // Generate unique reference based on type
       const typePrefix = insertComponent.type?.substring(0, 3).toUpperCase() || 'CMP';
+      console.log('🏷️ Generated prefix:', typePrefix);
+      
       const existingCount = await db
         .select({ count: sql<number>`count(*)` })
         .from(components)
         .where(like(components.reference, `${typePrefix}-%`));
       
+      console.log('📊 Existing count query result:', existingCount);
       const nextNumber = (existingCount[0]?.count || 0) + 1;
       const reference = `${typePrefix}-${nextNumber.toString().padStart(3, '0')}`;
+      console.log('🔢 Generated reference:', reference);
+
+      const componentToInsert = {
+        ...insertComponent,
+        reference,
+        createdAt: new Date()
+      };
+      console.log('📝 Component data to insert:', componentToInsert);
 
       const [component] = await db
         .insert(components)
-        .values({
-          ...insertComponent,
-          reference,
-          createdAt: new Date()
-        })
+        .values(componentToInsert)
         .returning();
+      
+      console.log('✅ Component created successfully:', component);
       return component;
     } catch (error) {
-      console.error('Error creating component:', error);
+      console.error('❌ Error creating component:', error);
+      console.error('❌ Error details:', {
+        name: error?.name,
+        message: error?.message,
+        code: error?.code,
+        detail: error?.detail,
+        constraint: error?.constraint
+      });
       throw error;
     }
   }
