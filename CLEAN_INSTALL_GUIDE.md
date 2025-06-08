@@ -55,17 +55,26 @@ Si vous voyez encore l'ancienne version malgré le formatage, suivez ces étapes
 - Authentification fonctionnelle
 - Base de données configurée
 
-## Vérification du bon fonctionnement
-Après `npm run dev`, vous devriez voir :
-- ✅ Serveur démarré sur le port 5000
-- ✅ Interface responsive sur tous appareils
-- ✅ Connexion/déconnexion automatique avec admin@ultrapc.com / admin123
-- ✅ Menu utilisateur visible sur mobile
-- ✅ Dashboard adaptatif selon le rôle
-- ✅ Navigation fluide sans erreurs
-- ✅ WebSocket connecté pour notifications temps réel
+## Solution définitive au problème de cache
 
-## Compte administrateur par défaut
-- Email: admin@ultrapc.com
-- Mot de passe: admin123
-- Accès complet à toutes les fonctionnalités
+**IMPORTANT**: Si vous voyez encore l'ancienne version après l'installation:
+
+1. **Fermez complètement votre navigateur** (tous les onglets)
+2. **Utilisez un navigateur différent** (ex: si vous utilisiez Chrome, utilisez Firefox)
+3. **Ou utilisez la navigation privée/incognito**
+4. **Videz le cache DNS** (Windows: `ipconfig /flushdns` dans cmd)
+
+## Vérification version 3.0
+L'interface doit maintenant afficher:
+- ✅ "Ultra PC System v3.0" dans l'en-tête
+- ✅ "Version Propre - Cache nettoyé" sur la page de connexion
+- ✅ Interface responsive optimisée
+- ✅ Authentification fonctionnelle
+- ✅ Dashboard adaptatif selon les rôles
+
+## Comptes de test
+- **Admin**: admin@ultrapc.com / admin123
+- **Réceptionniste**: reception@ultrapc.com / reception123  
+- **Stock**: stock@ultrapc.com / stock123
+
+## Port d'accès: http://localhost:5000
