@@ -66,6 +66,7 @@ interface NewOrderFormData {
   totalAmount: string;
   notes: string;
   shippingAddress: string;
+  productId?: number;
 }
 
 export default function Orders() {
@@ -105,21 +106,36 @@ export default function Orders() {
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: NewOrderFormData) => {
       console.log('Creating order with data:', orderData);
-      return await apiRequest("POST", "/api/orders", orderData);
+      
+      // Prepare order data for API
+      const apiOrderData = {
+        customerEmail: orderData.customerEmail,
+        customerFirstName: orderData.customerFirstName,
+        customerLastName: orderData.customerLastName,
+        customerPhone: orderData.customerPhone || '',
+        selectedComponents: orderData.selectedComponents,
+        totalAmount: parseFloat(orderData.totalAmount),
+        notes: orderData.notes || '',
+        shippingAddress: orderData.shippingAddress,
+        productId: 1 // Default product ID for custom builds
+      };
+      
+      const response = await apiRequest("POST", "/api/orders", apiOrderData);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
       setIsNewOrderDialogOpen(false);
       toast({
-        title: "Success",
-        description: "Order created successfully",
+        title: "Succès",
+        description: "Commande créée avec succès",
       });
     },
     onError: (error: Error) => {
       console.error('Order creation error:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to create order",
+        title: "Erreur",
+        description: error.message || "Échec de la création de la commande",
         variant: "destructive",
       });
     },
