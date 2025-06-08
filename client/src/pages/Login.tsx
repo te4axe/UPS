@@ -34,15 +34,12 @@ export default function Login() {
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté.",
       });
-      // Redirection immédiate
-      setLocation("/");
     } catch (error) {
       toast({
         title: "Échec de la connexion",
         description: "Email ou mot de passe invalide. Veuillez réessayer.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };

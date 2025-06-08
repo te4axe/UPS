@@ -61,6 +61,8 @@ export function useAuth() {
     onSuccess: (userData) => {
       setUser(userData);
       queryClient.invalidateQueries();
+      // Force le rechargement de la page pour garantir la redirection
+      window.location.href = '/';
     },
   });
 
@@ -77,6 +79,8 @@ export function useAuth() {
     onSuccess: () => {
       setUser(null);
       queryClient.clear();
+      // Force le rechargement vers la page de login
+      window.location.href = '/login';
     },
   });
 

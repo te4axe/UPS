@@ -29,23 +29,29 @@ function Router() {
     );
   }
 
-  if (!user) {
-    return <Login />;
-  }
-
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/orders" component={Orders} />
-        <Route path="/inventory" component={Inventory} />
-        <Route path="/reports" component={Reports} />
-        {user.role === 'admin' && (
-          <Route path="/users" component={UserManagement} />
-        )}
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/login">
+        {user ? <Dashboard /> : <Login />}
+      </Route>
+      
+      {user ? (
+        <Layout>
+          <Switch>
+            <Route path="/" component={Dashboard} />
+            <Route path="/orders" component={Orders} />
+            <Route path="/inventory" component={Inventory} />
+            <Route path="/reports" component={Reports} />
+            {user.role === 'admin' && (
+              <Route path="/users" component={UserManagement} />
+            )}
+            <Route component={NotFound} />
+          </Switch>
+        </Layout>
+      ) : (
+        <Login />
+      )}
+    </Switch>
   );
 }
 
