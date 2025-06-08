@@ -121,15 +121,15 @@ export default function Layout({ children }: LayoutProps) {
       <div className={`fixed inset-y-0 left-0 z-50 w-64 sm:w-72 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0`}>
-        <div className="flex items-center justify-center h-14 sm:h-16 bg-sky-blue-500 text-white">
-          <Cpu className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-          <span className="text-lg sm:text-xl font-bold">Ultra PC</span>
+        <div className="flex items-center justify-center h-16 bg-blue-600 text-white">
+          <Cpu className="w-6 h-6 mr-2" />
+          <span className="text-xl font-bold">Ultra PC</span>
         </div>
         
         <nav className="mt-6 sm:mt-8 h-full overflow-y-auto">
           <div className="px-3 sm:px-4 mb-4">
-            <div className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-sky-blue-50 rounded-lg">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-sky-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-blue-50 rounded-lg">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-medium text-xs sm:text-sm">
                   {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                 </span>
@@ -153,7 +153,7 @@ export default function Layout({ children }: LayoutProps) {
                   <a
                     className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg transition-colors touch-button ${
                       isActive
-                        ? 'bg-sky-blue-50 text-sky-blue-700'
+                        ? 'bg-blue-50 text-blue-700'
                         : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
                     }`}
                     onClick={() => setSidebarOpen(false)}
@@ -221,7 +221,7 @@ export default function Layout({ children }: LayoutProps) {
               <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
                 <DialogTrigger asChild>
                   <Button variant="ghost" size="sm" className="flex items-center space-x-1 sm:space-x-2 touch-button">
-                    <div className="w-8 h-8 bg-sky-blue-500 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                       <span className="text-white text-xs sm:text-sm font-medium">
                         {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                       </span>
