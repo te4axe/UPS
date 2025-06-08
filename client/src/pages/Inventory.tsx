@@ -522,9 +522,15 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Generate unique reference based on type and timestamp
+    const typePrefix = formData.type.toUpperCase().substring(0, 3);
+    const timestamp = Date.now().toString().slice(-6);
+    const reference = `${typePrefix}-${timestamp}`;
+    
     // Transform data to match server expectations
     const transformedData = {
       ...formData,
+      reference: reference,
       price: parseFloat(formData.price) || 0,
       stockQuantity: parseInt(formData.stockQuantity.toString()) || 0,
       minStockLevel: parseInt(formData.minStockLevel.toString()) || 5,
