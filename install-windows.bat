@@ -14,6 +14,10 @@ REM Installation avec resolution forcee
 echo Installation des dependances...
 npm install --legacy-peer-deps
 
+REM Copie de la configuration Vite locale
+echo Configuration Vite pour installation locale...
+copy vite.config.local.ts vite.config.ts
+
 REM Demarrage
 echo Demarrage du serveur...
 npm run dev
