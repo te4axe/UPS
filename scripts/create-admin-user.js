@@ -4,9 +4,9 @@
  * Script pour créer un utilisateur admin avec mot de passe hashé correctement
  */
 
-import bcrypt from 'bcrypt';
-import { Client } from 'pg';
-import dotenv from 'dotenv';
+const bcrypt = require('bcrypt');
+const { Client } = require('pg');
+const dotenv = require('dotenv');
 
 // Charger les variables d'environnement
 dotenv.config();
