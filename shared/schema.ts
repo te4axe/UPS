@@ -66,7 +66,7 @@ export const products = pgTable("products", {
 // Components inventory
 export const components = pgTable("components", {
   id: serial("id").primaryKey(),
-  reference: text("reference").notNull().unique(), // Auto-generated reference like CPU-001, GPU-002, etc.
+  serialNumber: text("serial_number").notNull().unique(), // Manual S/N entry
   name: text("name").notNull(),
   type: text("type").notNull(), // CPU, GPU, Memory, Storage, Motherboard, Power Supply, Case, Cooling
   brand: text("brand"),

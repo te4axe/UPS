@@ -508,6 +508,7 @@ export default function Inventory() {
 // Component Form for Adding New Components
 function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void; isLoading: boolean }) {
   const [formData, setFormData] = useState({
+    serialNumber: '',
     name: '',
     type: '',
     brand: '',
@@ -522,15 +523,9 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Generate unique reference based on type and timestamp
-    const typePrefix = formData.type.toUpperCase().substring(0, 3);
-    const timestamp = Date.now().toString().slice(-6);
-    const reference = `${typePrefix}-${timestamp}`;
-    
     // Transform data to match server expectations
     const transformedData = {
       ...formData,
-      reference: reference,
       price: parseFloat(formData.price) || 0,
       stockQuantity: parseInt(formData.stockQuantity.toString()) || 0,
       minStockLevel: parseInt(formData.minStockLevel.toString()) || 5,
@@ -543,7 +538,18 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="name">Component Name</Label>
+        <Label htmlFor="serialNumber">S/N (Numéro de série)</Label>
+        <Input
+          id="serialNumber"
+          value={formData.serialNumber}
+          onChange={(e) => setFormData(prev => ({ ...prev, serialNumber: e.target.value }))}
+          placeholder="Ex: SNK12345, ABC-789"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="name">Nom du Composant</Label>
         <Input
           id="name"
           value={formData.name}
