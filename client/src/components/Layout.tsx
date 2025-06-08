@@ -182,7 +182,7 @@ export default function Layout({ children }: LayoutProps) {
       {/* Main Content */}
       <div className="lg:ml-64 sm:lg:ml-72">
         {/* Top Header */}
-        <header className="fixed top-0 right-0 left-0 lg:left-64 sm:lg:left-72 bg-white shadow-sm border-b border-gray-200 h-14 sm:h-16 flex items-center justify-between px-3 sm:px-6 z-30">
+        <header className="bg-white shadow-sm border-b border-gray-200 h-14 sm:h-16 flex items-center justify-between px-3 sm:px-6">
           <div className="flex items-center flex-1 min-w-0">
             <Button
               variant="ghost"
@@ -285,7 +285,7 @@ export default function Layout({ children }: LayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="p-3 sm:p-4 lg:p-6 pt-16 sm:pt-20 lg:pt-22 min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)]">
+        <main className="p-3 sm:p-4 lg:p-6 pt-4 sm:pt-6 lg:pt-8 min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)]">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
