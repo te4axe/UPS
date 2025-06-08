@@ -8,7 +8,7 @@ if exist package-lock.json del package-lock.json
 
 REM Copie du package.json correct
 echo Configuration du projet...
-copy package-clean.json package.json
+copy package-minimal.json package.json
 
 REM Installation avec resolution forcee
 echo Installation des dependances...
