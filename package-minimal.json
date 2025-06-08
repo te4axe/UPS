@@ -5,10 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "node server-simple.js",
-    "dev-full": "tsx server-standalone.ts",
-    "dev-original": "tsx server/index.ts",
     "build": "vite build",
-    "start": "node dist/server/index.js",
+    "start": "node server-simple.js",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 @echo off
-echo Ultra PC System v3.0 - Demarrage Rapide
-echo ======================================
+echo Ultra PC - Installation et Demarrage
+echo ===================================
 
 REM Verifier si les dependances sont installees
 if not exist node_modules (
@@ -9,8 +9,8 @@ if not exist node_modules (
     npm install --legacy-peer-deps
 )
 
-REM Demarrage du serveur simple
-echo Demarrage du serveur Ultra PC v3.0...
+REM Demarrage du serveur
+echo Demarrage du serveur Ultra PC...
 node server-simple.js
 
 pause
