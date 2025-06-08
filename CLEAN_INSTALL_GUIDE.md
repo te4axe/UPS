@@ -44,8 +44,15 @@
 
 ## Vérification du bon fonctionnement
 Après `npm run dev`, vous devriez voir :
+- ✅ Serveur démarré sur le port 5000
 - ✅ Interface responsive sur tous appareils
-- ✅ Connexion/déconnexion automatique
+- ✅ Connexion/déconnexion automatique avec admin@ultrapc.com / admin123
 - ✅ Menu utilisateur visible sur mobile
-- ✅ Dashboard adaptatif
+- ✅ Dashboard adaptatif selon le rôle
 - ✅ Navigation fluide sans erreurs
+- ✅ WebSocket connecté pour notifications temps réel
+
+## Compte administrateur par défaut
+- Email: admin@ultrapc.com
+- Mot de passe: admin123
+- Accès complet à toutes les fonctionnalités
