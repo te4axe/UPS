@@ -201,9 +201,10 @@ export default function Layout({ children }: LayoutProps) {
             {/* Notifications Component */}
             <Notifications />
 
-            {/* User Menu - Hidden on mobile, shown on larger screens */}
-            <div className="hidden sm:flex items-center space-x-2">
-              <div className="text-right">
+            {/* User Menu - Always visible */}
+            <div className="flex items-center space-x-2">
+              {/* User info - Hidden on mobile */}
+              <div className="hidden sm:block text-right">
                 <div className="text-sm font-medium text-gray-900">
                   {user?.firstName} {user?.lastName}
                 </div>
@@ -219,56 +220,59 @@ export default function Layout({ children }: LayoutProps) {
               
               <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                  <Button variant="ghost" size="sm" className="flex items-center space-x-1 sm:space-x-2 touch-button">
                     <div className="w-8 h-8 bg-sky-blue-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">
+                      <span className="text-white text-xs sm:text-sm font-medium">
                         {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                       </span>
                     </div>
-                    <ChevronDown className="w-4 h-4" />
+                    <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Changer le mot de passe</DialogTitle>
-                    <DialogDescription>
+                <DialogContent className="w-[95vw] max-w-md mx-auto">
+                  <DialogHeader className="space-y-2">
+                    <DialogTitle className="text-lg sm:text-xl">Changer le mot de passe</DialogTitle>
+                    <DialogDescription className="text-sm sm:text-base">
                       Modifiez votre mot de passe actuel
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="current-password">Mot de passe actuel</Label>
+                  <div className="space-y-4 p-1">
+                    <div className="space-y-2">
+                      <Label htmlFor="current-password" className="text-sm sm:text-base">Mot de passe actuel</Label>
                       <Input
                         id="current-password"
                         type="password"
                         value={passwordData.currentPassword}
                         onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                        className="touch-button text-sm sm:text-base"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="new-password">Nouveau mot de passe</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password" className="text-sm sm:text-base">Nouveau mot de passe</Label>
                       <Input
                         id="new-password"
                         type="password"
                         value={passwordData.newPassword}
                         onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                        className="touch-button text-sm sm:text-base"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password" className="text-sm sm:text-base">Confirmer le mot de passe</Label>
                       <Input
                         id="confirm-password"
                         type="password"
                         value={passwordData.confirmPassword}
                         onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                        className="touch-button text-sm sm:text-base"
                       />
                     </div>
-                    <div className="flex space-x-2">
-                      <Button onClick={handlePasswordChange} className="flex-1">
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 pt-2">
+                      <Button onClick={handlePasswordChange} className="flex-1 touch-button text-sm sm:text-base">
                         <Key className="w-4 h-4 mr-2" />
                         Modifier
                       </Button>
-                      <Button variant="outline" onClick={handleLogout}>
+                      <Button variant="outline" onClick={handleLogout} className="flex-1 touch-button text-sm sm:text-base">
                         <LogOut className="w-4 h-4 mr-2" />
                         Déconnexion
                       </Button>
