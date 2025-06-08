@@ -90,13 +90,36 @@ export default function Inventory() {
       queryClient.invalidateQueries({ queryKey: ["/api/components/stats"] });
       setIsDialogOpen(false);
       toast({
-        title: "Success",
-        description: "Component added successfully",
+        title: "Succès",
+        description: "Composant ajouté avec succès",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateComponentMutation = useMutation({
+    mutationFn: async ({ componentId, updates }: { componentId: number; updates: any }) => {
+      return await apiRequest("PATCH", `/api/components/${componentId}`, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/components"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/components/stats"] });
+      setIsEditDialogOpen(false);
+      setSelectedComponent(null);
+      toast({
+        title: "Succès",
+        description: "Composant mis à jour avec succès",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erreur",
         description: error.message,
         variant: "destructive",
       });
@@ -165,6 +188,15 @@ export default function Inventory() {
         componentId: selectedComponent.id,
         quantity: selectedComponent.stockQuantity + stockAdjustment.quantity,
         notes: stockAdjustment.notes
+      });
+    }
+  };
+
+  const submitComponentUpdate = (formData: any) => {
+    if (selectedComponent) {
+      updateComponentMutation.mutate({
+        componentId: selectedComponent.id,
+        updates: formData
       });
     }
   };
@@ -449,6 +481,26 @@ export default function Inventory() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Component Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Modifier le Composant</DialogTitle>
+            <DialogDescription>
+              Modifiez les informations pour {selectedComponent?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedComponent && (
+            <EditComponentForm 
+              component={selectedComponent}
+              onSubmit={submitComponentUpdate} 
+              isLoading={updateComponentMutation.isPending} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -579,6 +631,123 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
 
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? "Adding..." : "Add Component"}
+      </Button>
+    </form>
+  );
+}
+
+// Edit Component Form
+function EditComponentForm({ component, onSubmit, isLoading }: { component: Component; onSubmit: (data: any) => void; isLoading: boolean }) {
+  const [formData, setFormData] = useState({
+    name: component.name || '',
+    type: component.type || '',
+    brand: component.brand || '',
+    model: component.model || '',
+    price: component.price || '',
+    location: component.location || '',
+    specifications: component.specifications || '',
+    minStockLevel: component.minStockLevel || 5
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="edit-name">Nom du Composant</Label>
+        <Input
+          id="edit-name"
+          value={formData.name}
+          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="edit-type">Type</Label>
+        <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}>
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionner le type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="CPU">CPU</SelectItem>
+            <SelectItem value="GPU">GPU</SelectItem>
+            <SelectItem value="Memory">Mémoire</SelectItem>
+            <SelectItem value="Storage">Stockage</SelectItem>
+            <SelectItem value="Motherboard">Carte Mère</SelectItem>
+            <SelectItem value="Power Supply">Alimentation</SelectItem>
+            <SelectItem value="Case">Boîtier</SelectItem>
+            <SelectItem value="Cooling">Refroidissement</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="edit-brand">Marque</Label>
+          <Input
+            id="edit-brand"
+            value={formData.brand}
+            onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
+          />
+        </div>
+        <div>
+          <Label htmlFor="edit-model">Modèle</Label>
+          <Input
+            id="edit-model"
+            value={formData.model}
+            onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="edit-price">Prix (€)</Label>
+          <Input
+            id="edit-price"
+            value={formData.price}
+            onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+            placeholder="0.00"
+          />
+        </div>
+        <div>
+          <Label htmlFor="edit-minStock">Niveau Min de Stock</Label>
+          <Input
+            id="edit-minStock"
+            type="number"
+            value={formData.minStockLevel}
+            onChange={(e) => setFormData(prev => ({ ...prev, minStockLevel: parseInt(e.target.value) || 5 }))}
+            min="0"
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="edit-location">Emplacement</Label>
+        <Input
+          id="edit-location"
+          value={formData.location}
+          onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+          placeholder="Ex: A1-B2, Entrepôt Nord"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="edit-specifications">Spécifications</Label>
+        <Textarea
+          id="edit-specifications"
+          value={formData.specifications}
+          onChange={(e) => setFormData(prev => ({ ...prev, specifications: e.target.value }))}
+          placeholder="Caractéristiques techniques du composant"
+        />
+      </div>
+
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? "Mise à jour..." : "Mettre à jour"}
       </Button>
     </form>
   );

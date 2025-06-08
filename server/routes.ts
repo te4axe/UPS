@@ -625,12 +625,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/components', authenticateToken, requireRole(['admin', 'stock_manager']), async (req, res) => {
     try {
+      console.log('Creating component with data:', req.body);
       const componentData = insertComponentSchema.parse(req.body);
       const component = await storage.createComponent(componentData);
       res.status(201).json(component);
     } catch (error) {
       console.error('Create component error:', error);
-      res.status(400).json({ message: "Failed to create component" });
+      if (error.name === 'ZodError') {
+        const issues = error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(', ');
+        res.status(400).json({ message: `Validation error: ${issues}` });
+      } else {
+        res.status(400).json({ message: "Failed to create component" });
+      }
     }
   });
 
