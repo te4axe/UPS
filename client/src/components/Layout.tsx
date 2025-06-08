@@ -2,12 +2,10 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
 import { 
   Cpu, 
   Menu, 
@@ -18,9 +16,7 @@ import {
   Package, 
   BarChart3,
   LogOut,
-  Bell,
   Key,
-  User,
   ChevronDown
 } from "lucide-react";
 import Notifications from "./Notifications";
@@ -37,12 +33,7 @@ export default function Layout({ children }: LayoutProps) {
   const { user, logout } = useAuth();
   const { toast } = useToast();
 
-  const { data: notifications } = useQuery({
-    queryKey: ["/api/notifications"],
-    refetchInterval: 30000,
-  });
 
-  const unreadCount = Array.isArray(notifications) ? notifications.filter((n: any) => !n.isRead).length : 0;
 
   const navigation = [
     { name: "Vue d'ensemble", href: "/", icon: LayoutDashboard, roles: ["admin", "receptionist", "stock_manager", "assembly", "packaging", "shipping"] },
@@ -198,20 +189,8 @@ export default function Layout({ children }: LayoutProps) {
           </div>
           
           <div className="flex items-center space-x-4">
-            {/* Notifications */}
-            <div className="relative">
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-1 -right-1 h-5 w-5 text-xs p-0 flex items-center justify-center"
-                  >
-                    {unreadCount}
-                  </Badge>
-                )}
-              </Button>
-            </div>
+            {/* Notifications Component */}
+            <Notifications />
 
             {/* User Menu */}
             <div className="flex items-center space-x-2">
