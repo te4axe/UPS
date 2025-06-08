@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import bcrypt from "bcrypt";
@@ -39,7 +39,7 @@ interface AuthenticatedRequest extends Express.Request {
 }
 
 // Middleware d'authentification basé sur les sessions
-function authenticateToken(req: AuthenticatedRequest, res: Express.Response, next: Express.NextFunction) {
+function authenticateToken(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   if (!req.session || !req.session.user) {
     return res.status(401).json({ message: "Non connecté" });
   }
@@ -50,7 +50,7 @@ function authenticateToken(req: AuthenticatedRequest, res: Express.Response, nex
 
 // Role-based authorization middleware
 function requireRole(roles: string[]) {
-  return (req: AuthenticatedRequest, res: Express.Response, next: Express.NextFunction) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({ message: "Insufficient permissions" });
     }

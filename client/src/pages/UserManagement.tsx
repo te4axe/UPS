@@ -103,20 +103,36 @@ export default function UserManagement() {
 
   const updateUserMutation = useMutation({
     mutationFn: async ({ userId, userData }: { userId: number; userData: Partial<UserFormData> }) => {
-      return await apiRequest("PATCH", `/api/users/${userId}`, userData);
+      const response = await apiRequest("PATCH", `/api/users/${userId}`, userData);
+      return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+    onSuccess: (updatedUser, { userId }) => {
+      // Update the users list cache immediately
+      queryClient.setQueryData(["/api/users"], (oldUsers: User[] | undefined) => {
+        if (!oldUsers) return oldUsers;
+        return oldUsers.map(user => 
+          user.id === userId ? { ...user, ...updatedUser } : user
+        );
+      });
+      
+      // Also update the current user cache if they updated their own profile
+      if (user && user.id === userId) {
+        queryClient.setQueryData(["/api/auth/me"], (oldUser: any) => ({
+          ...oldUser,
+          ...updatedUser
+        }));
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["/api/users/stats"] });
       setEditingUser(null);
       toast({
-        title: "Success",
-        description: "User updated successfully",
+        title: "Succès",
+        description: "Utilisateur mis à jour avec succès",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: "Erreur",
         description: error.message,
         variant: "destructive",
       });

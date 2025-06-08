@@ -198,50 +198,84 @@ export default function Reports() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Statut des Commandes</CardTitle>
+            <CardTitle>Répartition des Utilisateurs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span>En Attente</span>
-                <span className="font-semibold">15</span>
-              </div>
-              <div className="flex justify-between">
-                <span>En Production</span>
-                <span className="font-semibold">{stats?.orders?.inProduction || 0}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Terminées</span>
-                <span className="font-semibold">142</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Expédiées</span>
-                <span className="font-semibold">128</span>
-              </div>
-            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={userRoleData} layout="horizontal">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis dataKey="role" type="category" />
+                <Tooltip />
+                <Bar dataKey="count" fill="#00C49F" />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Stock Critique</CardTitle>
+            <CardTitle>Composants en Stock Faible</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {lowStockComponents.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  Aucun composant en stock faible
+                </p>
+              ) : (
+                lowStockComponents.map((component: any) => (
+                  <div key={component.id} className="flex justify-between items-center p-2 bg-red-50 rounded">
+                    <div>
+                      <p className="font-medium text-sm">{component.name}</p>
+                      <p className="text-xs text-muted-foreground">{component.type}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-red-600">{component.stockQuantity}</p>
+                      <p className="text-xs text-muted-foreground">en stock</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Commandes Récentes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex justify-between">
-                <span>Stock Faible</span>
-                <span className="font-semibold text-yellow-600">{stats?.components?.lowStock || 0}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Rupture de Stock</span>
-                <span className="font-semibold text-red-600">{stats?.components?.outOfStock || 0}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Stock Normal</span>
-                <span className="font-semibold text-green-600">
-                  {(stats?.components?.total || 0) - (stats?.components?.lowStock || 0) - (stats?.components?.outOfStock || 0)}
-                </span>
-              </div>
+              {recentOrders.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  Aucune commande enregistrée
+                </p>
+              ) : (
+                recentOrders.map((order: any) => (
+                  <div key={order.id} className="flex justify-between items-center p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium">{order.orderNumber}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {order.customer?.firstName} {order.customer?.lastName}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold">{parseFloat(order.totalAmount || 0).toLocaleString()}€</p>
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        order.status === 'created' ? 'bg-blue-100 text-blue-800' :
+                        order.status === 'confirmed' ? 'bg-yellow-100 text-yellow-800' :
+                        order.status === 'shipped' ? 'bg-green-100 text-green-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {order.status?.replace('_', ' ')}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
