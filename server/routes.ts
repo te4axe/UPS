@@ -789,6 +789,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User management routes
+  app.get('/api/users', authenticateToken, requireRole(['admin']), async (req: AuthenticatedRequest, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error('Get users error:', error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.get('/api/users/stats', authenticateToken, requireRole(['admin']), async (req: AuthenticatedRequest, res) => {
+    try {
+      const stats = await storage.getUserStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Get user stats error:', error);
+      res.status(500).json({ message: "Failed to fetch user statistics" });
+    }
+  });
+
+  app.post('/api/users', authenticateToken, requireRole(['admin']), async (req: AuthenticatedRequest, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      
+      // Hash password
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      const userToCreate = {
+        ...userData,
+        password: hashedPassword,
+      };
+      
+      const user = await storage.createUser(userToCreate);
+      
+      // Don't return password in response
+      const { password, ...userResponse } = user;
+      res.status(201).json(userResponse);
+    } catch (error) {
+      console.error('Create user error:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", details: error.errors });
+      }
+      res.status(400).json({ message: "Failed to create user" });
+    }
+  });
+
+  app.patch('/api/users/:id', authenticateToken, requireRole(['admin']), async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const updateData = req.body;
+      
+      console.log('Updating user:', userId, 'with data:', updateData);
+      
+      // Hash password if provided
+      if (updateData.password) {
+        updateData.password = await bcrypt.hash(updateData.password, 10);
+      }
+      
+      const updatedUser = await storage.updateUser(userId, updateData);
+      
+      // Don't return password in response
+      const { password, ...userResponse } = updatedUser;
+      
+      console.log('User updated successfully:', userResponse);
+      res.json(userResponse);
+    } catch (error) {
+      console.error('Update user error:', error);
+      res.status(400).json({ message: "Failed to update user" });
+    }
+  });
+
+  app.delete('/api/users/:id', authenticateToken, requireRole(['admin']), async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Prevent admin from deleting themselves
+      if (req.user!.id === userId) {
+        return res.status(400).json({ message: "Cannot delete your own account" });
+      }
+      
+      await storage.updateUser(userId, { isActive: false });
+      res.json({ message: "User deactivated successfully" });
+    } catch (error) {
+      console.error('Delete user error:', error);
+      res.status(400).json({ message: "Failed to delete user" });
+    }
+  });
+
   console.log('🚀 All routes registered successfully');
   return httpServer;
 }
