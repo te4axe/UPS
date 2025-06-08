@@ -42,89 +42,89 @@ export default function Dashboard() {
       case 'admin':
         return (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-                  <Package className="h-4 w-4 text-muted-foreground" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
+              <Card className="mobile-card">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+                  <CardTitle className="text-xs sm:text-sm font-medium truncate">Total Orders</CardTitle>
+                  <Package className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats?.total || 0}</div>
+                <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+                  <div className="text-lg sm:text-2xl font-bold">{stats?.total || 0}</div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">In Production</CardTitle>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
+              <Card className="mobile-card">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+                  <CardTitle className="text-xs sm:text-sm font-medium truncate">Production</CardTitle>
+                  <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats?.inProduction || 0}</div>
+                <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+                  <div className="text-lg sm:text-2xl font-bold">{stats?.inProduction || 0}</div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Shipped Today</CardTitle>
-                  <Truck className="h-4 w-4 text-muted-foreground" />
+              <Card className="mobile-card">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+                  <CardTitle className="text-xs sm:text-sm font-medium truncate">Shipped</CardTitle>
+                  <Truck className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats?.shippedToday || 0}</div>
+                <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+                  <div className="text-lg sm:text-2xl font-bold">{stats?.shippedToday || 0}</div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <Card className="mobile-card">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2">
+                  <CardTitle className="text-xs sm:text-sm font-medium truncate">Revenue</CardTitle>
+                  <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">${stats?.revenue?.toLocaleString() || '0'}</div>
+                <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+                  <div className="text-lg sm:text-2xl font-bold">${stats?.revenue?.toLocaleString() || '0'}</div>
                 </CardContent>
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-              <Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
+              <Card className="mobile-card">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    User Management
+                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                    <span className="truncate">User Management</span>
                   </CardTitle>
-                  <CardDescription>Manage staff and permissions</CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">Manage staff and permissions</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Link href="/users">
-                    <Button className="w-full">Manage Users</Button>
+                    <Button className="w-full touch-button text-sm sm:text-base">Manage Users</Button>
                   </Link>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="mobile-card">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Package className="h-5 w-5" />
-                    Order Overview
+                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <Package className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                    <span className="truncate">Order Overview</span>
                   </CardTitle>
-                  <CardDescription>Monitor all orders</CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">Monitor all orders</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Link href="/orders">
-                    <Button className="w-full">View All Orders</Button>
+                    <Button className="w-full touch-button text-sm sm:text-base">View All Orders</Button>
                   </Link>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="mobile-card sm:col-span-2 lg:col-span-1">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    System Settings
+                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                    <span className="truncate">System Settings</span>
                   </CardTitle>
-                  <CardDescription>Configure system preferences</CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">Configure system preferences</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">Settings</Button>
+                  <Button className="w-full touch-button text-sm sm:text-base" variant="outline">Settings</Button>
                 </CardContent>
               </Card>
             </div>
@@ -133,36 +133,36 @@ export default function Dashboard() {
 
       case 'receptionist':
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            <Card>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
+            <Card className="mobile-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="h-5 w-5" />
-                  Create New Order
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                  <Package className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                  <span className="truncate">Create New Order</span>
                 </CardTitle>
-                <CardDescription>Register new customer orders</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Register new customer orders</CardDescription>
               </CardHeader>
               <CardContent>
                 <Link href="/orders">
-                  <Button className="w-full">New Order</Button>
+                  <Button className="w-full touch-button text-sm sm:text-base">New Order</Button>
                 </Link>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="mobile-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ClipboardCheck className="h-5 w-5" />
-                  Pending Orders
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                  <ClipboardCheck className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                  <span className="truncate">Pending Orders</span>
                 </CardTitle>
-                <CardDescription>Orders awaiting confirmation</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Orders awaiting confirmation</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold mb-2">
+                <div className="text-lg sm:text-2xl font-bold mb-2">
                   {recentOrders?.filter(order => order.status === 'created').length || 0}
                 </div>
                 <Link href="/orders">
-                  <Button variant="outline" className="w-full">View Orders</Button>
+                  <Button variant="outline" className="w-full touch-button text-sm sm:text-base">View Orders</Button>
                 </Link>
               </CardContent>
             </Card>

@@ -45,20 +45,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-sky flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-sky-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Cpu className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gradient-sky flex items-center justify-center p-3 sm:p-4">
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="text-center p-4 sm:p-6">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-sky-blue-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <Cpu className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Ultra PC</CardTitle>
-          <CardDescription>Système de Gestion des Commandes</CardDescription>
+          <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900">Ultra PC</CardTitle>
+          <CardDescription className="text-sm sm:text-base">Système de Gestion des Commandes</CardDescription>
         </CardHeader>
         
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <CardContent className="p-4 sm:p-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Adresse Email</Label>
+              <Label htmlFor="email" className="text-sm sm:text-base">Adresse Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -66,12 +66,12 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="focus-sky"
+                className="focus-sky touch-button text-sm sm:text-base"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de Passe</Label>
+              <Label htmlFor="password" className="text-sm sm:text-base">Mot de Passe</Label>
               <Input
                 id="password"
                 type="password"
@@ -79,13 +79,13 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="focus-sky"
+                className="focus-sky touch-button text-sm sm:text-base"
               />
             </div>
             
             <Button 
               type="submit" 
-              className="w-full bg-sky-blue-500 hover:bg-sky-blue-600 text-white"
+              className="w-full bg-sky-blue-500 hover:bg-sky-blue-600 text-white touch-button text-sm sm:text-base"
               disabled={isLoading}
             >
               {isLoading ? (
