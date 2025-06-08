@@ -328,10 +328,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Welcome back, {user.firstName}!</p>
+    <div className="max-w-7xl mx-auto">
+      <div className="mb-4 sm:mb-6">
+        <p className="text-gray-600">Bienvenue, {user.firstName}!</p>
         <Badge variant="outline" className="mt-2 capitalize">{user.role}</Badge>
       </div>
 
