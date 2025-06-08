@@ -285,7 +285,7 @@ export default function Layout({ children }: LayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="p-3 sm:p-4 lg:p-6 pt-6 sm:pt-8 lg:pt-10 min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)]">
+        <main className="p-3 sm:p-4 lg:p-6 pt-20 sm:pt-24 lg:pt-28 min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)]">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
