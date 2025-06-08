@@ -214,18 +214,33 @@ export const insertCustomerSchema = createInsertSchema(customers).omit({
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
   createdAt: true,
+}).extend({
+  basePrice: z.union([
+    z.string().transform((val) => val),
+    z.number().transform((val) => val.toString())
+  ])
 });
 
 export const insertComponentSchema = createInsertSchema(components).omit({
   id: true,
   reference: true, // Auto-generated
   createdAt: true,
+}).extend({
+  price: z.union([
+    z.string().transform((val) => val),
+    z.number().transform((val) => val.toString())
+  ])
 });
 
 export const insertOrderSchema = createInsertSchema(orders).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  totalAmount: z.union([
+    z.string().transform((val) => val),
+    z.number().transform((val) => val.toString())
+  ])
 });
 
 export const insertOrderStatusHistorySchema = createInsertSchema(orderStatusHistory).omit({
@@ -236,6 +251,11 @@ export const insertOrderStatusHistorySchema = createInsertSchema(orderStatusHist
 export const insertOrderComponentSchema = createInsertSchema(orderComponents).omit({
   id: true,
   selectedAt: true,
+}).extend({
+  priceAtTime: z.union([
+    z.string().transform((val) => val),
+    z.number().transform((val) => val.toString())
+  ])
 });
 
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
