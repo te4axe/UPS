@@ -53,6 +53,6 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Ultra PC System v3.0 running on http://localhost:${PORT}`);
-  console.log('Basic server mode - Login with admin@ultrapc.com / admin123');
+  console.log(`Ultra PC running on http://localhost:${PORT}`);
+  console.log('Login with admin@ultrapc.com / admin123');
 });

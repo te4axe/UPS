@@ -51,11 +51,8 @@ export default function Login() {
           <div className="w-12 h-12 sm:w-16 sm:h-16 bg-sky-blue-500 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
             <Cpu className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
           </div>
-          <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900">Ultra PC System v3.0</CardTitle>
-          <CardDescription className="text-sm sm:text-base">Gestion des Composants - Version Propre</CardDescription>
-          <div className="mt-2 px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full inline-block">
-            ✓ Cache nettoyé - Version finale
-          </div>
+          <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900">Ultra PC</CardTitle>
+          <CardDescription className="text-sm sm:text-base">Système de Gestion des Commandes</CardDescription>
         </CardHeader>
         
         <CardContent className="p-4 sm:p-6">
