@@ -347,10 +347,21 @@ export class DatabaseStorage implements IStorage {
 
   async createComponent(insertComponent: InsertComponent): Promise<Component> {
     try {
+      // Generate unique reference based on type
+      const typePrefix = insertComponent.type?.substring(0, 3).toUpperCase() || 'CMP';
+      const existingCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(components)
+        .where(like(components.reference, `${typePrefix}-%`));
+      
+      const nextNumber = (existingCount[0]?.count || 0) + 1;
+      const reference = `${typePrefix}-${nextNumber.toString().padStart(3, '0')}`;
+
       const [component] = await db
         .insert(components)
         .values({
           ...insertComponent,
+          reference,
           createdAt: new Date()
         })
         .returning();

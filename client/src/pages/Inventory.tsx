@@ -237,7 +237,7 @@ export default function Inventory() {
                 Add Component
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md mx-auto">
+            <DialogContent className="max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Component</DialogTitle>
                 <DialogDescription>
@@ -514,7 +514,7 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
     model: '',
     stockQuantity: 0,
     minStockLevel: 5,
-    price: '',
+    price: '0.00',
     location: '',
     specifications: ''
   });

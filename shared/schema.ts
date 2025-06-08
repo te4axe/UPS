@@ -218,6 +218,7 @@ export const insertProductSchema = createInsertSchema(products).omit({
 
 export const insertComponentSchema = createInsertSchema(components).omit({
   id: true,
+  reference: true, // Auto-generated
   createdAt: true,
 });
 
