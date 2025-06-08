@@ -123,7 +123,10 @@ export default function Layout({ children }: LayoutProps) {
       } lg:translate-x-0`}>
         <div className="flex items-center justify-center h-14 sm:h-16 bg-sky-blue-500 text-white">
           <Cpu className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-          <span className="text-lg sm:text-xl font-bold">Ultra PC</span>
+          <div className="flex flex-col items-center">
+            <span className="text-lg sm:text-xl font-bold">Ultra PC</span>
+            <span className="text-xs opacity-90">System v3.0</span>
+          </div>
         </div>
         
         <nav className="mt-6 sm:mt-8 h-full overflow-y-auto">

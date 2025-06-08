@@ -1,4 +1,8 @@
-# Guide d'installation propre - Ultra PC
+# Guide d'installation propre - Ultra PC System v3.0
+
+## Important: Résolution du problème de cache
+
+Si vous voyez encore l'ancienne version malgré le formatage, suivez ces étapes:
 
 ## Téléchargement et installation
 
@@ -6,23 +10,32 @@
    - Cliquez sur les 3 points (...) dans Replit
    - Sélectionnez "Download as zip"
 
-2. **Installation sur votre PC**
+2. **Installation PROPRE sur votre PC**
    ```bash
-   # Supprimez complètement l'ancien dossier du projet s'il existe
+   # 1. Supprimez TOUT ancien dossier ultrapc/ultrapc-management
+   rm -rf ultrapc*
    
-   # Extrayez le nouveau zip dans un dossier vide
+   # 2. Créez un nouveau dossier avec un nom différent
+   mkdir ultrapc-system-v3
+   cd ultrapc-system-v3
    
-   # Naviguez vers le dossier du projet
-   cd ultrapc-management
+   # 3. Extrayez le zip ICI (pas dans un sous-dossier)
    
-   # Copiez le package.json propre
+   # 4. Copiez le package.json propre
    cp package-clean.json package.json
    
-   # Installation des dépendances
+   # 5. Nettoyage cache navigateur OBLIGATOIRE
+   # - Chrome: Ctrl+Shift+Delete → Tout supprimer
+   # - Firefox: Ctrl+Shift+Delete → Tout supprimer
+   # - Edge: Ctrl+Shift+Delete → Tout supprimer
+   
+   # 6. Installation des dépendances
    npm install
    
-   # Démarrage du projet
+   # 7. Démarrage sur un port différent
    npm run dev
+   
+   # 8. Ouvrez http://localhost:5000 en navigation privée
    ```
 
 3. **Configuration de la base de données**
