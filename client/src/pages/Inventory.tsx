@@ -521,7 +521,17 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Transform data to match server expectations
+    const transformedData = {
+      ...formData,
+      price: parseFloat(formData.price) || 0,
+      stockQuantity: parseInt(formData.stockQuantity.toString()) || 0,
+      minStockLevel: parseInt(formData.minStockLevel.toString()) || 5,
+      specifications: formData.specifications || null
+    };
+    
+    onSubmit(transformedData);
   };
 
   return (

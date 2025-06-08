@@ -28,7 +28,7 @@ declare module 'express-session' {
   }
 }
 
-interface AuthenticatedRequest extends Express.Request {
+interface AuthenticatedRequest extends Request {
   user?: {
     id: number;
     email: string;
@@ -626,6 +626,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/components', authenticateToken, requireRole(['admin', 'stock_manager']), async (req, res) => {
     try {
       console.log('Creating component with data:', req.body);
+      
+      // Validate required fields
+      if (!req.body.name || !req.body.type) {
+        return res.status(400).json({ 
+          message: "Name and type are required fields" 
+        });
+      }
+      
       const componentData = insertComponentSchema.parse(req.body);
       const component = await storage.createComponent(componentData);
       res.status(201).json(component);
@@ -635,7 +643,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const issues = error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(', ');
         res.status(400).json({ message: `Validation error: ${issues}` });
       } else {
-        res.status(400).json({ message: "Failed to create component" });
+        res.status(500).json({ message: "Failed to create component" });
       }
     }
   });
