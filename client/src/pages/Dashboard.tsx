@@ -143,7 +143,9 @@ export default function Dashboard() {
                 <CardDescription>Register new customer orders</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">New Order</Button>
+                <Link href="/orders">
+                  <Button className="w-full">New Order</Button>
+                </Link>
               </CardContent>
             </Card>
 

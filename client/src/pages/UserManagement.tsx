@@ -187,6 +187,16 @@ export default function UserManagement() {
     }
   };
 
+  // Ordre fixe des rôles selon les spécifications
+  const roleOrder = [
+    'admin',
+    'assembly',
+    'receptionist', 
+    'packaging',
+    'shipping',
+    'stock_manager'
+  ];
+
   const filteredUsers = users?.filter(u => {
     const matchesSearch = 
       u.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -196,6 +206,17 @@ export default function UserManagement() {
     const matchesRole = roleFilter === "all" || u.role === roleFilter;
     
     return matchesSearch && matchesRole;
+  }).sort((a, b) => {
+    // Trier par ordre de rôle d'abord, puis par nom
+    const roleIndexA = roleOrder.indexOf(a.role);
+    const roleIndexB = roleOrder.indexOf(b.role);
+    
+    if (roleIndexA !== roleIndexB) {
+      return roleIndexA - roleIndexB;
+    }
+    
+    // Si même rôle, trier par nom
+    return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
   }) || [];
 
   const getRoleBadgeColor = (role: string) => {
