@@ -9,29 +9,29 @@ DELETE FROM users;
 -- Créer les 6 employés avec mots de passe hashés
 -- Tous les mots de passe sont: password123
 
--- 1. Admin Principal
+-- 1. Administrateur Hamza
 INSERT INTO users (id, email, password, first_name, last_name, role, is_active, created_at, updated_at) VALUES
-(1, 'admin@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Admin', 'Principal', 'admin', true, NOW(), NOW());
+(1, 'admin@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Hamza', 'Administrateur', 'admin', true, NOW(), NOW());
 
--- 2. Réceptionniste
+-- 2. Montage Hicham
 INSERT INTO users (id, email, password, first_name, last_name, role, is_active, created_at, updated_at) VALUES
-(2, 'marie.dupont@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Marie', 'Dupont', 'receptionist', true, NOW(), NOW());
+(2, 'montage@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Hicham', 'Montage', 'assembly', true, NOW(), NOW());
 
--- 3. Technicien Assembly
+-- 3. Réception Ayman
 INSERT INTO users (id, email, password, first_name, last_name, role, is_active, created_at, updated_at) VALUES
-(3, 'jean.martin@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Jean', 'Martin', 'assembly', true, NOW(), NOW());
+(3, 'reception@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Ayman', 'Réception', 'receptionist', true, NOW(), NOW());
 
--- 4. Technicien Testing
+-- 4. Employé Emballage
 INSERT INTO users (id, email, password, first_name, last_name, role, is_active, created_at, updated_at) VALUES
-(4, 'sophie.bernard@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Sophie', 'Bernard', 'testing', true, NOW(), NOW());
+(4, 'emballage@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Employé', 'Emballage', 'packaging', true, NOW(), NOW());
 
--- 5. Technicien Packaging
+-- 5. Employé Expédition
 INSERT INTO users (id, email, password, first_name, last_name, role, is_active, created_at, updated_at) VALUES
-(5, 'pierre.moreau@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Pierre', 'Moreau', 'packaging', true, NOW(), NOW());
+(5, 'expedition@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Employé', 'Expédition', 'shipping', true, NOW(), NOW());
 
--- 6. Responsable Expédition
+-- 6. Responsable Composants
 INSERT INTO users (id, email, password, first_name, last_name, role, is_active, created_at, updated_at) VALUES
-(6, 'claire.dubois@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Claire', 'Dubois', 'shipping', true, NOW(), NOW());
+(6, 'composants@ultrapc.com', '$2b$10$CJLw7Ws2VfehhU.xh0eoq.Fsm2RycJmuPji2kq2h3N4yZsdgbxyDC', 'Responsable', 'Composants', 'admin', true, NOW(), NOW());
 
 -- Réinitialiser la séquence des IDs
 SELECT setval('users_id_seq', 6, true);
