@@ -13,7 +13,7 @@ import UserManagement from "@/pages/UserManagement";
 import Inventory from "@/pages/Inventory";
 import Reports from "@/pages/Reports";
 import Layout from "@/components/Layout";
-import Notifications from "@/components/Notifications";
+
 
 function Router() {
   const { user, isLoading } = useAuth();
@@ -35,7 +35,6 @@ function Router() {
 
   return (
     <Layout>
-      <Notifications />
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/orders" component={Orders} />

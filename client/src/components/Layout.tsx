@@ -126,7 +126,7 @@ export default function Layout({ children }: LayoutProps) {
                   {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                 </span>
               </div>
-              <div>
+              <div className="flex-1">
                 <div className="font-medium text-gray-900">
                   {user?.firstName} {user?.lastName}
                 </div>
