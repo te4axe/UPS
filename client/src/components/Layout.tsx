@@ -118,33 +118,48 @@ export default function Layout({ children }: LayoutProps) {
         />
       )}
 
-      {/* Sidebar - Always visible on desktop */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 sm:w-72 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+      {/* Sidebar - Collapsible */}
+      <div className={`fixed inset-y-0 left-0 z-50 ${sidebarCollapsed ? 'w-16' : 'w-64 sm:w-72'} bg-white shadow-lg transform transition-all duration-300 ease-in-out lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
-        <div className="flex items-center justify-center h-16 bg-sky-500 text-white">
-          <Cpu className="w-6 h-6 mr-2" />
-          <span className="text-xl font-bold">Ultra PC</span>
+        <div className="flex items-center justify-center h-16 bg-sky-500 text-white relative">
+          {!sidebarCollapsed && (
+            <>
+              <Cpu className="w-6 h-6 mr-2" />
+              <span className="text-xl font-bold">Ultra PC</span>
+            </>
+          )}
+          {sidebarCollapsed && <Cpu className="w-6 h-6" />}
+          
+          {/* Toggle Button */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="absolute -right-3 top-1/2 transform -translate-y-1/2 bg-sky-500 hover:bg-sky-600 text-white rounded-full p-1 shadow-lg hidden lg:block"
+          >
+            <ChevronDown className={`w-4 h-4 transform transition-transform ${sidebarCollapsed ? 'rotate-90' : '-rotate-90'}`} />
+          </button>
         </div>
         
         <nav className="mt-6 sm:mt-8 h-full overflow-y-auto">
-          <div className="px-3 sm:px-4 mb-4">
-            <div className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-sky-50 rounded-lg">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-medium text-xs sm:text-sm">
-                  {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-gray-900 text-sm sm:text-base truncate">
-                  {user?.firstName} {user?.lastName}
+          {!sidebarCollapsed && (
+            <div className="px-3 sm:px-4 mb-4">
+              <div className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-sky-50 rounded-lg">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-medium text-xs sm:text-sm">
+                    {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                  </span>
                 </div>
-                <div className="text-xs sm:text-sm text-gray-500 capitalize truncate">
-                  {user?.role?.replace('_', ' ')}
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                    {user?.firstName} {user?.lastName}
+                  </div>
+                  <div className="text-xs sm:text-sm text-gray-500 capitalize truncate">
+                    {user?.role?.replace('_', ' ')}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
           
           <div className="space-y-1 sm:space-y-2 px-3 sm:px-4 pb-20">
             {filteredNavigation.map((item) => {
@@ -152,15 +167,16 @@ export default function Layout({ children }: LayoutProps) {
               return (
                 <Link key={item.name} href={item.href}>
                   <a
-                    className={`flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg transition-colors touch-button ${
+                    className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-2 sm:space-x-3'} p-2 sm:p-3 rounded-lg transition-colors touch-button ${
                       isActive
                         ? 'bg-sky-50 text-sky-700'
                         : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
                     }`}
                     onClick={() => setSidebarOpen(false)}
+                    title={sidebarCollapsed ? item.name : ''}
                   >
                     <item.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                    <span className="text-sm sm:text-base truncate">{item.name}</span>
+                    {!sidebarCollapsed && <span className="text-sm sm:text-base truncate">{item.name}</span>}
                   </a>
                 </Link>
               );
@@ -172,16 +188,17 @@ export default function Layout({ children }: LayoutProps) {
           <Button
             onClick={handleLogout}
             variant="ghost"
-            className="w-full justify-start text-gray-700 hover:bg-gray-100 touch-button text-sm sm:text-base"
+            className={`w-full ${sidebarCollapsed ? 'justify-center' : 'justify-start'} text-gray-700 hover:bg-gray-100 touch-button text-sm sm:text-base`}
+            title={sidebarCollapsed ? 'Déconnexion' : ''}
           >
             <LogOut className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
-            Déconnexion
+            {!sidebarCollapsed && 'Déconnexion'}
           </Button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="lg:ml-64 sm:lg:ml-72">
+      <div className={`${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64 sm:lg:ml-72'} transition-all duration-300`}>
         {/* Top Header */}
         <header className="bg-white shadow-sm border-b border-gray-200 h-14 sm:h-16 flex items-center justify-between px-3 sm:px-6">
           <div className="flex items-center flex-1 min-w-0">
