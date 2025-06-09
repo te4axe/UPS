@@ -15,13 +15,12 @@ import { apiRequest } from "@/lib/queryClient";
 
 interface Component {
   id: number;
-  reference: string;
+  serialNumber: string;
   name: string;
   type: string;
   brand?: string;
   model?: string;
   stockQuantity: number;
-  minStockLevel: number;
   price: string;
   location?: string;
   specifications?: any;
@@ -130,23 +129,23 @@ export default function Inventory() {
     const matchesSearch = 
       component.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       component.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      component.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      component.serialNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       component.brand?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesType = typeFilter === "all" || component.type === typeFilter;
     
     const matchesStock = 
       stockFilter === "all" ||
-      (stockFilter === "low" && component.stockQuantity <= component.minStockLevel) ||
+      (stockFilter === "low" && component.stockQuantity <= 10) ||
       (stockFilter === "out" && component.stockQuantity === 0) ||
-      (stockFilter === "good" && component.stockQuantity > component.minStockLevel);
+      (stockFilter === "good" && component.stockQuantity > 10);
     
     return matchesSearch && matchesType && matchesStock;
   }) || [];
 
   const getStockStatus = (component: Component) => {
     if (component.stockQuantity === 0) return "out";
-    if (component.stockQuantity <= component.minStockLevel) return "low";
+    if (component.stockQuantity <= 10) return "low";
     return "good";
   };
 
@@ -372,7 +371,7 @@ export default function Inventory() {
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 text-sm text-gray-600">
                       <p>
-                        <span className="font-medium">Référence:</span> {component.reference}
+                        <span className="font-medium">S/N:</span> {component.serialNumber}
                       </p>
                       <p>
                         <span className="font-medium">Type:</span> {component.type}
@@ -655,7 +654,7 @@ function EditComponentForm({ component, onSubmit, isLoading }: { component: Comp
     price: component.price || '',
     location: component.location || '',
     specifications: component.specifications || '',
-    minStockLevel: component.minStockLevel || 5
+    stockQuantity: component.stockQuantity || 0
   });
 
   const handleSubmit = (e: React.FormEvent) => {
