@@ -508,14 +508,13 @@ export default function Inventory() {
 // Component Form for Adding New Components
 function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void; isLoading: boolean }) {
   const [formData, setFormData] = useState({
-    serialNumber: '',
     name: '',
     type: '',
     brand: '',
     model: '',
     stockQuantity: 0,
-    minStockLevel: 5,
     price: '0.00',
+    serialNumber: '',
     location: '',
     specifications: ''
   });
@@ -528,7 +527,6 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
       ...formData,
       price: parseFloat(formData.price) || 0,
       stockQuantity: parseInt(formData.stockQuantity.toString()) || 0,
-      minStockLevel: parseInt(formData.minStockLevel.toString()) || 5,
       specifications: formData.specifications || null
     };
     
@@ -537,17 +535,6 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="serialNumber">S/N (Numéro de série)</Label>
-        <Input
-          id="serialNumber"
-          value={formData.serialNumber}
-          onChange={(e) => setFormData(prev => ({ ...prev, serialNumber: e.target.value }))}
-          placeholder="Ex: SNK12345, ABC-789"
-          required
-        />
-      </div>
-
       <div>
         <Label htmlFor="name">Nom du Composant</Label>
         <Input
@@ -579,7 +566,7 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="stockQuantity">Initial Stock</Label>
+          <Label htmlFor="stockQuantity">Stock Initial</Label>
           <Input
             id="stockQuantity"
             type="number"
@@ -589,13 +576,13 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
           />
         </div>
         <div>
-          <Label htmlFor="minStockLevel">Min Stock Level</Label>
+          <Label htmlFor="serialNumber">S/N (Numéro de série)</Label>
           <Input
-            id="minStockLevel"
-            type="number"
-            value={formData.minStockLevel}
-            onChange={(e) => setFormData(prev => ({ ...prev, minStockLevel: parseInt(e.target.value) || 0 }))}
-            min="0"
+            id="serialNumber"
+            value={formData.serialNumber}
+            onChange={(e) => setFormData(prev => ({ ...prev, serialNumber: e.target.value }))}
+            placeholder="Ex: SNK12345, ABC-789"
+            required
           />
         </div>
       </div>

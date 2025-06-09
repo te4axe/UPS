@@ -74,7 +74,6 @@ export const components = pgTable("components", {
   specifications: jsonb("specifications"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   stockQuantity: integer("stock_quantity").default(0),
-  minStockLevel: integer("min_stock_level").default(5),
   location: text("location"), // Storage location in warehouse
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
