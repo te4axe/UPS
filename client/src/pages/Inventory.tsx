@@ -647,6 +647,7 @@ function ComponentForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void;
 // Edit Component Form
 function EditComponentForm({ component, onSubmit, isLoading }: { component: Component; onSubmit: (data: any) => void; isLoading: boolean }) {
   const [formData, setFormData] = useState({
+    serialNumber: component.serialNumber || '',
     name: component.name || '',
     type: component.type || '',
     brand: component.brand || '',
@@ -664,14 +665,25 @@ function EditComponentForm({ component, onSubmit, isLoading }: { component: Comp
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="edit-name">Nom du Composant</Label>
-        <Input
-          id="edit-name"
-          value={formData.name}
-          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-          required
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="edit-name">Nom du Composant</Label>
+          <Input
+            id="edit-name"
+            value={formData.name}
+            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="edit-serialNumber">S/N (Numéro de série)</Label>
+          <Input
+            id="edit-serialNumber"
+            value={formData.serialNumber}
+            onChange={(e) => setFormData(prev => ({ ...prev, serialNumber: e.target.value }))}
+            required
+          />
+        </div>
       </div>
 
       <div>
@@ -723,12 +735,12 @@ function EditComponentForm({ component, onSubmit, isLoading }: { component: Comp
           />
         </div>
         <div>
-          <Label htmlFor="edit-minStock">Niveau Min de Stock</Label>
+          <Label htmlFor="edit-stockQuantity">Stock Actuel</Label>
           <Input
-            id="edit-minStock"
+            id="edit-stockQuantity"
             type="number"
-            value={formData.minStockLevel}
-            onChange={(e) => setFormData(prev => ({ ...prev, minStockLevel: parseInt(e.target.value) || 5 }))}
+            value={formData.stockQuantity}
+            onChange={(e) => setFormData(prev => ({ ...prev, stockQuantity: parseInt(e.target.value) || 0 }))}
             min="0"
           />
         </div>
