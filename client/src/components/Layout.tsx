@@ -119,7 +119,7 @@ export default function Layout({ children }: LayoutProps) {
       )}
 
       {/* Sidebar - Collapsible */}
-      <div className={`fixed inset-y-0 left-0 z-50 ${sidebarCollapsed ? 'w-16' : 'w-64 sm:w-72'} bg-white shadow-lg transform transition-all duration-300 ease-in-out lg:translate-x-0 ${
+      <div className={`fixed inset-y-0 left-0 z-50 ${sidebarCollapsed ? 'w-16' : 'w-64'} bg-white shadow-lg transform transition-all duration-300 ease-in-out lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
         <div className="flex items-center justify-center h-16 bg-sky-500 text-white relative">
@@ -198,7 +198,7 @@ export default function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className={`${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64 sm:lg:ml-72'} transition-all duration-300`}>
+      <div className={`${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'} transition-all duration-300 min-h-screen`}>
         {/* Top Header */}
         <header className="bg-white shadow-sm border-b border-gray-200 h-14 sm:h-16 flex items-center justify-between px-3 sm:px-6">
           <div className="flex items-center flex-1 min-w-0">

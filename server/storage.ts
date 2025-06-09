@@ -396,7 +396,7 @@ export class DatabaseStorage implements IStorage {
       return await db.select().from(components)
         .where(and(
           eq(components.isActive, true),
-          sql`${components.stockQuantity} <= ${components.minStockLevel}`
+          sql`${components.stockQuantity} <= 5`
         ))
         .orderBy(components.stockQuantity);
     } catch (error) {
@@ -760,7 +760,7 @@ export class DatabaseStorage implements IStorage {
       const [lowStockResult] = await db.select({ count: count() }).from(components)
         .where(and(
           eq(components.isActive, true),
-          sql`${components.stockQuantity} <= ${components.minStockLevel}`,
+          sql`${components.stockQuantity} <= 5`,
           sql`${components.stockQuantity} > 0`
         ));
 
