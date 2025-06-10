@@ -548,7 +548,7 @@ function ComponentSearch({
                         {component.model && `${component.model}`}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
-                        <span className="font-medium">Référence:</span> {component.reference}
+                        <span className="font-medium">Référence:</span> {component.serialNumber}
                       </p>
                       <p className="text-sm text-gray-500">
                         Stock: {component.stockQuantity} unités
