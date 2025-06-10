@@ -295,7 +295,9 @@ export const ORDER_STATUSES = [
   "components_selected",
   "assembly_started",
   "assembly_completed",
+  "packaging_started",
   "packaged",
+  "shipping_started",
   "shipped",
   "delivered"
 ] as const;

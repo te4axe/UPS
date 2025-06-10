@@ -526,6 +526,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour démarrer l'emballage
+  app.patch('/api/orders/:id/start-packaging', authenticateToken, requireRole(['packer', 'admin']), async (req: AuthenticatedRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Commande non trouvée" });
+      }
+
+      // Mettre à jour la commande avec l'assignation packaging
+      await storage.updateOrder(orderId, {
+        status: 'packaging_started',
+        packagingAssigneeId: req.user!.id,
+        currentAssigneeId: req.user!.id
+      });
+
+      // Notification à l'admin
+      await storage.createNotification({
+        userId: 1, // Admin
+        title: 'Emballage commencé',
+        message: `${req.user!.firstName} a commencé l'emballage de la commande ${order.orderNumber}`,
+        type: 'info',
+        relatedOrderId: order.id,
+      });
+
+      broadcastToRoles(['admin'], {
+        type: 'packaging_started',
+        title: 'Emballage commencé',
+        message: `Emballage de la commande ${order.orderNumber} commencé par ${req.user!.firstName}`,
+        orderId: order.id,
+      });
+
+      res.json({ message: "Emballage commencé avec succès" });
+    } catch (error) {
+      console.error('Start packaging error:', error);
+      res.status(500).json({ message: "Erreur lors du démarrage de l'emballage" });
+    }
+  });
+
+  // Route pour terminer l'emballage
+  app.patch('/api/orders/:id/complete-packaging', authenticateToken, requireRole(['packer', 'admin']), async (req: AuthenticatedRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Commande non trouvée" });
+      }
+
+      // Mettre à jour la commande
+      await storage.updateOrder(orderId, {
+        status: 'packaged',
+        packagingCompletedAt: new Date(),
+      });
+
+      // Notifier tous les employés shipping
+      const shippingUsers = await storage.getUsersByRole('shipper');
+      for (const user of shippingUsers) {
+        await storage.createNotification({
+          userId: user.id,
+          title: 'Prêt pour expédition',
+          message: `La commande ${order.orderNumber} est emballée et prête pour expédition`,
+          type: 'info',
+          relatedOrderId: order.id,
+        });
+      }
+
+      // Notifier l'admin
+      await storage.createNotification({
+        userId: 1,
+        title: 'Emballage terminé',
+        message: `${req.user!.firstName} a terminé l'emballage de la commande ${order.orderNumber}`,
+        type: 'success',
+        relatedOrderId: order.id,
+      });
+
+      broadcastToRoles(['shipper', 'admin'], {
+        type: 'packaging_completed',
+        title: 'Prêt pour expédition',
+        message: `Commande ${order.orderNumber} emballée, prête pour expédition`,
+        orderId: order.id,
+      });
+
+      res.json({ message: "Emballage terminé avec succès" });
+    } catch (error) {
+      console.error('Complete packaging error:', error);
+      res.status(500).json({ message: "Erreur lors de la finalisation de l'emballage" });
+    }
+  });
+
+  // Route pour démarrer l'expédition
+  app.patch('/api/orders/:id/start-shipping', authenticateToken, requireRole(['shipper', 'admin']), async (req: AuthenticatedRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Commande non trouvée" });
+      }
+
+      // Mettre à jour la commande avec l'assignation shipping
+      await storage.updateOrder(orderId, {
+        status: 'shipping_started',
+        shippingAssigneeId: req.user!.id,
+        shippingStartedAt: new Date(),
+        currentAssigneeId: req.user!.id
+      });
+
+      // Notification à l'admin
+      await storage.createNotification({
+        userId: 1,
+        title: 'Expédition commencée',
+        message: `${req.user!.firstName} a commencé l'expédition de la commande ${order.orderNumber}`,
+        type: 'info',
+        relatedOrderId: order.id,
+      });
+
+      broadcastToRoles(['admin'], {
+        type: 'shipping_started',
+        title: 'Expédition commencée',
+        message: `Expédition de la commande ${order.orderNumber} commencée par ${req.user!.firstName}`,
+        orderId: order.id,
+      });
+
+      res.json({ message: "Expédition commencée avec succès" });
+    } catch (error) {
+      console.error('Start shipping error:', error);
+      res.status(500).json({ message: "Erreur lors du démarrage de l'expédition" });
+    }
+  });
+
+  // Route pour terminer l'expédition
+  app.patch('/api/orders/:id/complete-shipping', authenticateToken, requireRole(['shipper', 'admin']), async (req: AuthenticatedRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { trackingNumber } = req.body;
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Commande non trouvée" });
+      }
+
+      // Mettre à jour la commande
+      await storage.updateOrder(orderId, {
+        status: 'shipped',
+        trackingNumber: trackingNumber || `TRACK-${order.orderNumber}`,
+      });
+
+      // Notifier l'admin
+      await storage.createNotification({
+        userId: 1,
+        title: 'Expédition terminée',
+        message: `${req.user!.firstName} a expédié la commande ${order.orderNumber}`,
+        type: 'success',
+        relatedOrderId: order.id,
+      });
+
+      broadcastToRoles(['admin'], {
+        type: 'shipping_completed',
+        title: 'Expédition terminée',
+        message: `Commande ${order.orderNumber} expédiée avec succès`,
+        orderId: order.id,
+      });
+
+      res.json({ message: "Expédition terminée avec succès" });
+    } catch (error) {
+      console.error('Complete shipping error:', error);
+      res.status(500).json({ message: "Erreur lors de la finalisation de l'expédition" });
+    }
+  });
+
   app.patch('/api/orders/:id/status', authenticateToken, async (req: AuthenticatedRequest, res) => {
     try {
       const orderId = parseInt(req.params.id);
@@ -540,10 +712,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check role permissions for status changes
       const rolePermissions: Record<string, string[]> = {
         'receptionist': ['confirmed'],
-        'components': ['components_selected'],
-        'assembly': ['assembly_started', 'assembly_completed'],
-        'packaging': ['packaged'],
-        'shipping': ['shipped'],
+        'inventory': ['components_selected'],
+        'technician': ['assembly_started', 'assembly_completed'],
+        'packer': ['packaging_started', 'packaged'],
+        'shipper': ['shipping_started', 'shipped'],
         'admin': ORDER_STATUSES as any,
       };
 
@@ -559,26 +731,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create notification for status change
       const notification = {
         type: 'status_changed',
-        title: 'Order Status Updated',
-        message: `Order ${order.orderNumber} status changed to ${status.replace('_', ' ')}`,
+        title: 'Statut de commande mis à jour',
+        message: `Commande ${order.orderNumber} - statut changé vers ${status.replace('_', ' ')}`,
         orderId: order.id,
       };
 
-      // Notify customer and relevant staff
-      if (order.customerId) {
-        try {
-          await storage.createNotification({
-            userId: order.customerId,
-            title: notification.title,
-            message: notification.message,
-            type: 'info',
-            relatedOrderId: order.id,
-          });
-          broadcastToUser(order.customerId, notification);
-        } catch (notifError) {
-          console.error('Error creating notification:', notifError);
-        }
-      }
+      // Notifier l'admin pour tous les changements de statut
+      await storage.createNotification({
+        userId: 1,
+        title: notification.title,
+        message: `${req.user!.firstName} a changé le statut de la commande ${order.orderNumber} vers ${status}`,
+        type: 'info',
+        relatedOrderId: order.id,
+      });
 
       broadcastToRoles(['admin'], notification);
 
