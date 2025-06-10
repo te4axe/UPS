@@ -490,7 +490,7 @@ function ComponentSearch({
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
         <Input
-          placeholder="Rechercher par nom ou référence (ex: 'RTX 4080', 'CPU-001', 'Intel')..."
+          placeholder="Rechercher par référence, nom ou type (ex: 'GPU-AMD-002', 'RTX 4080', 'CPU', 'Intel')..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
@@ -548,7 +548,7 @@ function ComponentSearch({
                         {component.model && `${component.model}`}
                       </p>
                       <p className="text-sm text-gray-500 mt-1">
-                        <span className="font-medium">Référence:</span> {component.serialNumber}
+                        <span className="font-medium">Référence:</span> {(component as any).serialNumber || (component as any).serial_number || 'N/A'}
                       </p>
                       <p className="text-sm text-gray-500">
                         Stock: {component.stockQuantity} unités

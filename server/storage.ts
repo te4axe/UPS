@@ -319,7 +319,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // NEW: Search components by name, type, brand, or model
+  // NEW: Search components by serial_number, name, type, brand, or model
   async searchComponents(searchTerm: string): Promise<Component[]> {
     try {
       const search = `%${searchTerm.toLowerCase()}%`;
@@ -327,6 +327,7 @@ export class DatabaseStorage implements IStorage {
       return await db.select().from(components)
         .where(and(
           or(
+            ilike(components.serialNumber, search),
             ilike(components.name, search),
             ilike(components.type, search),
             ilike(components.brand, search),
