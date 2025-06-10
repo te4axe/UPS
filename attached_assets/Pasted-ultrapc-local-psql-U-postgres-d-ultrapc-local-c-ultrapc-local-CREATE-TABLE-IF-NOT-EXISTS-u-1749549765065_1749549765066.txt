@@ -1,0 +1,120 @@
+ultrapc_local=# psql -U postgres -d ultrapc_local -c "
+ultrapc_local"# CREATE TABLE IF NOT EXISTS users (
+ultrapc_local"#     id SERIAL PRIMARY KEY,
+ultrapc_local"#     email TEXT NOT NULL UNIQUE,
+ultrapc_local"#     password TEXT NOT NULL,
+ultrapc_local"#     first_name TEXT,
+ultrapc_local"#     last_name TEXT,
+ultrapc_local"#     role TEXT NOT NULL,
+ultrapc_local"#     is_active BOOLEAN DEFAULT true,
+ultrapc_local"#     created_at TIMESTAMP DEFAULT NOW(),
+ultrapc_local"#     updated_at TIMESTAMP DEFAULT NOW()
+ultrapc_local"# );
+ultrapc_local"#
+ultrapc_local"# INSERT INTO users (email, password, first_name, last_name, role, is_active) VALUES
+ultrapc_local"# ('admin@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Admin', 'Hamza', 'admin', true),
+ultrapc_local"# ('montage@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Montage', 'Hicham', 'assembly', true),
+ultrapc_local"# ('reception@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Reception', 'Ayman', 'receptionist', true),
+ultrapc_local"# ('emballage@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Emballage', 'Employee', 'packaging', true),
+ultrapc_local"# ('expedition@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Expedition', 'Employee', 'shipping', true),
+ultrapc_local"# ('composants@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Composants', 'Employee', 'components', true);
+ultrapc_local"#
+ultrapc_local"# CREATE TABLE IF NOT EXISTS sessions (
+ultrapc_local"#     sid VARCHAR NOT NULL PRIMARY KEY,
+ultrapc_local"#     sess JSON NOT NULL,
+ultrapc_local"#     expire TIMESTAMP(6) NOT NULL
+ultrapc_local"# );
+ultrapc_local"# "
+ultrapc_local-# \q
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>psql -U postgres -d ultrapc_local -c "
+Password for user postgres:
+psql: error: FATAL:  password authentication failed for user "postgres"
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    id SERIAL PRIMARY KEY,
+'id' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    email TEXT NOT NULL UNIQUE,
+'email' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    password TEXT NOT NULL,
+'password' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    first_name TEXT,
+'first_name' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    last_name TEXT,
+'last_name' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    role TEXT NOT NULL,
+'role' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    is_active BOOLEAN DEFAULT true,
+'is_active' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    created_at TIMESTAMP DEFAULT NOW(),
+'created_at' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    updated_at TIMESTAMP DEFAULT NOW()
+'updated_at' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>);
+C:\Users\Yahya Bouzekri\Desktop\UPS>
+C:\Users\Yahya Bouzekri\Desktop\UPS>INSERT INTO users (email, password, first_name, last_name, role, is_active) VALUES
+'INSERT' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>('admin@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Admin', 'Hamza', 'admin', true),
+''admin@ultrapc.com'' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>('montage@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Montage', 'Hicham', 'assembly', true),
+''montage@ultrapc.com'' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>('reception@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Reception', 'Ayman', 'receptionist', true),
+''reception@ultrapc.com'' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>('emballage@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Emballage', 'Employee', 'packaging', true),
+''emballage@ultrapc.com'' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>('expedition@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Expedition', 'Employee', 'shipping', true),
+''expedition@ultrapc.com'' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>('composants@ultrapc.com', '\$2b\$10\$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'Composants', 'Employee', 'components', true);
+''composants@ultrapc.com'' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>
+C:\Users\Yahya Bouzekri\Desktop\UPS>CREATE TABLE IF NOT EXISTS sessions (
+'CREATE' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    sid VARCHAR NOT NULL PRIMARY KEY,
+'sid' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    sess JSON NOT NULL,
+'sess' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>    expire TIMESTAMP(6) NOT NULL
+'expire' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\Yahya Bouzekri\Desktop\UPS>);
+C:\Users\Yahya Bouzekri\Desktop\UPS>"
+'"' is not recognized as an internal or external command,
+operable program or batch file.
