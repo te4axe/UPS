@@ -526,6 +526,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Route pour démarrer le ramassage de composants
+  app.patch('/api/orders/:id/start-picking', authenticateToken, requireRole(['picker', 'admin']), async (req: AuthenticatedRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Commande non trouvée" });
+      }
+
+      if (order.status !== 'confirmed') {
+        return res.status(400).json({ message: "La commande doit être confirmée avant le ramassage" });
+      }
+
+      // Mettre à jour la commande
+      await storage.updateOrder(orderId, {
+        status: 'picking_started',
+        currentAssigneeId: req.user!.id
+      });
+
+      // Notification à l'admin
+      await storage.createNotification({
+        userId: 1,
+        title: 'Ramassage de composants commencé',
+        message: `${req.user!.firstName} a commencé le ramassage des composants pour la commande ${order.orderNumber}`,
+        type: 'info',
+        relatedOrderId: order.id,
+      });
+
+      broadcastToRoles(['admin'], {
+        type: 'picking_started',
+        title: 'Ramassage commencé',
+        message: `Ramassage des composants pour la commande ${order.orderNumber} commencé par ${req.user!.firstName}`,
+        orderId: order.id,
+      });
+
+      res.json({ message: "Ramassage de composants commencé avec succès" });
+    } catch (error) {
+      console.error('Start picking error:', error);
+      res.status(500).json({ message: "Erreur lors du démarrage du ramassage" });
+    }
+  });
+
+  // Route pour terminer le ramassage de composants
+  app.patch('/api/orders/:id/complete-picking', authenticateToken, requireRole(['picker', 'admin']), async (req: AuthenticatedRequest, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const order = await storage.getOrder(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Commande non trouvée" });
+      }
+
+      // Mettre à jour la commande
+      await storage.updateOrder(orderId, {
+        status: 'components_picked',
+      });
+
+      // Notifier tous les employés technician (montage)
+      const technicianUsers = await storage.getUsersByRole('technician');
+      for (const user of technicianUsers) {
+        await storage.createNotification({
+          userId: user.id,
+          title: 'Composants prêts pour montage',
+          message: `Les composants de la commande ${order.orderNumber} sont collectés et prêts pour le montage`,
+          type: 'info',
+          relatedOrderId: order.id,
+        });
+      }
+
+      // Notifier l'admin
+      await storage.createNotification({
+        userId: 1,
+        title: 'Ramassage terminé',
+        message: `${req.user!.firstName} a terminé le ramassage des composants pour la commande ${order.orderNumber}`,
+        type: 'success',
+        relatedOrderId: order.id,
+      });
+
+      broadcastToRoles(['technician', 'admin'], {
+        type: 'picking_completed',
+        title: 'Prêt pour montage',
+        message: `Commande ${order.orderNumber} - composants collectés, prête pour montage`,
+        orderId: order.id,
+      });
+
+      res.json({ message: "Ramassage de composants terminé avec succès" });
+    } catch (error) {
+      console.error('Complete picking error:', error);
+      res.status(500).json({ message: "Erreur lors de la finalisation du ramassage" });
+    }
+  });
+
   // Route pour démarrer l'emballage
   app.patch('/api/orders/:id/start-packaging', authenticateToken, requireRole(['packer', 'admin']), async (req: AuthenticatedRequest, res) => {
     try {
@@ -712,6 +805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check role permissions for status changes
       const rolePermissions: Record<string, string[]> = {
         'receptionist': ['confirmed'],
+        'picker': ['picking_started', 'components_picked'],
         'inventory': ['components_selected'],
         'technician': ['assembly_started', 'assembly_completed'],
         'packer': ['packaging_started', 'packaged'],

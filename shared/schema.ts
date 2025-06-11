@@ -292,7 +292,8 @@ export type LoginCredentials = z.infer<typeof loginSchema>;
 export const ORDER_STATUSES = [
   "created",
   "confirmed", 
-  "components_selected",
+  "picking_started",
+  "components_picked",
   "assembly_started",
   "assembly_completed",
   "packaging_started",
@@ -308,10 +309,11 @@ export type OrderStatus = typeof ORDER_STATUSES[number];
 export const USER_ROLES = [
   "admin",
   "receptionist", // Réceptionnaire - crée les commandes uniquement
-  "stock_manager", // Gestionnaire Stock - gère l'inventaire et les composants
-  "assembly",
-  "packaging",
-  "shipping",
+  "inventory", // Gestionnaire inventaire - gère l'inventaire et les composants
+  "picker", // Ramasseur - collecte les composants après confirmation
+  "technician", // Technicien montage - assemble les PC
+  "packer", // Emballeur - emballe les commandes
+  "shipper", // Expéditeur - expédie les commandes
   "customer"
 ] as const;
 
