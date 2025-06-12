@@ -190,11 +190,12 @@ export default function UserManagement() {
   // Ordre fixe des rôles selon les spécifications
   const roleOrder = [
     'admin',
-    'assembly',
     'receptionist', 
+    'picker',
+    'assembly',
     'packaging',
     'shipping',
-    'stock_manager'
+    'inventory'
   ];
 
   const filteredUsers = users?.filter(u => {
@@ -223,10 +224,11 @@ export default function UserManagement() {
     const colors = {
       admin: "bg-red-100 text-red-800",
       receptionist: "bg-blue-100 text-blue-800",
-      stock_manager: "bg-green-100 text-green-800",
+      picker: "bg-cyan-100 text-cyan-800",
       assembly: "bg-yellow-100 text-yellow-800",
       packaging: "bg-purple-100 text-purple-800",
       shipping: "bg-orange-100 text-orange-800",
+      inventory: "bg-green-100 text-green-800",
     };
     return colors[role as keyof typeof colors] || "bg-gray-100 text-gray-800";
   };
@@ -235,10 +237,11 @@ export default function UserManagement() {
     const labels = {
       admin: "Administrateur",
       receptionist: "Réceptionnaire", 
-      stock_manager: "Gestionnaire Stock",
+      picker: "Ramasseur Composants",
       assembly: "Employé Montage",
       packaging: "Employé Emballage",
       shipping: "Expéditeur",
+      inventory: "Gestionnaire Stock",
     };
     return labels[role as keyof typeof labels] || role;
   };

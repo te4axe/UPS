@@ -752,7 +752,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Route pour terminer l'expédition
-  app.patch('/api/orders/:id/complete-shipping', authenticateToken, requireRole(['shipper', 'admin']), async (req: AuthenticatedRequest, res) => {
+  app.patch('/api/orders/:id/complete-shipping', authenticateToken, requireRole(['shipping', 'admin']), async (req: AuthenticatedRequest, res) => {
     try {
       const orderId = parseInt(req.params.id);
       const { trackingNumber } = req.body;
@@ -820,13 +820,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = await storage.updateOrderStatus(orderId, status, req.user!.id, notes);
 
-      console.log(`✅ Order ${orderId} status updated to ${status}`);
+      console.log(`✅ Order ${orderId} status updated to ${status} by ${req.user!.firstName || req.user!.email}`);
 
-      // Create notification for status change
+      // Create notification for status change with proper user name
+      const userName = req.user!.firstName && req.user!.lastName 
+        ? `${req.user!.firstName} ${req.user!.lastName}`
+        : req.user!.firstName || req.user!.email;
+
       const notification = {
         type: 'status_changed',
         title: 'Statut de commande mis à jour',
-        message: `Commande ${order.orderNumber} - statut changé vers ${status.replace('_', ' ')}`,
+        message: `Commande ${order.orderNumber} - statut changé vers ${status.replace('_', ' ')} par ${userName}`,
         orderId: order.id,
       };
 
@@ -834,7 +838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createNotification({
         userId: 1,
         title: notification.title,
-        message: `${req.user!.firstName} a changé le statut de la commande ${order.orderNumber} vers ${status}`,
+        message: `${userName} a changé le statut de la commande ${order.orderNumber} vers ${status}`,
         type: 'info',
         relatedOrderId: order.id,
       });
@@ -1013,10 +1017,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Notifications routes
+  // Notifications routes - filtered by role
   app.get('/api/notifications', authenticateToken, async (req: AuthenticatedRequest, res) => {
     try {
-      const notifications = await storage.getUserNotifications(req.user!.id);
+      let notifications;
+      
+      // Admin sees all notifications
+      if (req.user!.role === 'admin') {
+        notifications = await storage.getUserNotifications(req.user!.id);
+      } else {
+        // Other roles only see notifications relevant to their next task
+        const allNotifications = await storage.getUserNotifications(req.user!.id);
+        
+        // Filter notifications based on role and what they need to see
+        notifications = allNotifications.filter(notification => {
+          const message = notification.message.toLowerCase();
+          const title = notification.title.toLowerCase();
+          
+          switch (req.user!.role) {
+            case 'picker':
+              return message.includes('confirmé') || title.includes('ramassage');
+            case 'assembly':
+              return message.includes('composants collectés') || message.includes('prêt pour montage') || title.includes('montage');
+            case 'packaging':
+              return message.includes('montage terminé') || message.includes('prêt pour emballage') || title.includes('emballage');
+            case 'shipping':
+              return message.includes('emballé') || message.includes('prêt pour expédition') || title.includes('expédition');
+            case 'receptionist':
+              return title.includes('nouvelle commande') || message.includes('expédié');
+            default:
+              return true;
+          }
+        });
+      }
+      
       res.json(notifications);
     } catch (error) {
       console.error('Get notifications error:', error);
