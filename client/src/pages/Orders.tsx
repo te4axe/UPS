@@ -78,6 +78,20 @@ export default function Orders() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isNewOrderDialogOpen, setIsNewOrderDialogOpen] = useState(false);
 
+  const getStatusLabel = (status: string) => {
+    const statusLabels = {
+      'created': 'Créé',
+      'confirmed': 'Confirmé',
+      'components_selected': 'Composants Sélectionnés',
+      'assembly_started': 'Montage Démarré',
+      'assembly_completed': 'Montage Terminé',
+      'packaged': 'Emballé',
+      'shipped': 'Expédié',
+      'delivered': 'Livré'
+    };
+    return statusLabels[status as keyof typeof statusLabels] || status;
+  };
+
   const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
     retry: false,
@@ -163,9 +177,9 @@ export default function Orders() {
         return filteredOrders.filter(order => 
           ['created', 'confirmed'].includes(order.status)
         );
-      case 'components':
+      case 'picker':
         return filteredOrders.filter(order => 
-          ['confirmed', 'components_selected'].includes(order.status)
+          order.status === 'confirmed'
         );
       case 'assembly':
         return filteredOrders.filter(order => 
@@ -217,14 +231,14 @@ export default function Orders() {
 
   const getActionLabel = (order: Order) => {
     const labels = {
-      'created': 'Confirm Order',
-      'confirmed': 'Select Components',
-      'components_selected': 'Start Assembly',
-      'assembly_started': 'Complete Assembly',
-      'assembly_completed': 'Package Order',
-      'packaged': 'Ship Order'
+      'created': 'Confirmer Commande',
+      'confirmed': user?.role === 'picker' ? 'Ramasser Composants' : 'Sélectionner Composants',
+      'components_selected': 'Démarrer Montage',
+      'assembly_started': 'Terminer Montage',
+      'assembly_completed': 'Emballer Commande',
+      'packaged': 'Expédier Commande'
     };
-    return labels[order.status as keyof typeof labels] || 'Update';
+    return labels[order.status as keyof typeof labels] || 'Mettre à jour';
   };
 
   const handleStatusUpdate = (order: Order) => {
@@ -287,29 +301,31 @@ export default function Orders() {
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search orders, customers..."
+                  placeholder={user?.role === 'picker' ? "Rechercher commandes à ramasser..." : "Rechercher commandes, clients..."}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="created">Created</SelectItem>
-                <SelectItem value="confirmed">Confirmed</SelectItem>
-                <SelectItem value="components_selected">Components Selected</SelectItem>
-                <SelectItem value="assembly_started">Assembly Started</SelectItem>
-                <SelectItem value="assembly_completed">Assembly Completed</SelectItem>
-                <SelectItem value="packaged">Packaged</SelectItem>
-                <SelectItem value="shipped">Shipped</SelectItem>
-                <SelectItem value="delivered">Delivered</SelectItem>
-              </SelectContent>
-            </Select>
+            {user.role !== 'picker' && (
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Filtrer par statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous Statuts</SelectItem>
+                  <SelectItem value="created">Créé</SelectItem>
+                  <SelectItem value="confirmed">Confirmé</SelectItem>
+                  <SelectItem value="components_selected">Composants Sélectionnés</SelectItem>
+                  <SelectItem value="assembly_started">Montage Démarré</SelectItem>
+                  <SelectItem value="assembly_completed">Montage Terminé</SelectItem>
+                  <SelectItem value="packaged">Emballé</SelectItem>
+                  <SelectItem value="shipped">Expédié</SelectItem>
+                  <SelectItem value="delivered">Livré</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -360,7 +376,7 @@ export default function Orders() {
                       className="w-full sm:w-auto"
                     >
                       <Eye className="h-4 w-4 mr-2" />
-                      View Details
+                      Voir Détails
                     </Button>
                     
                     {canUpdateStatus(order) && (
