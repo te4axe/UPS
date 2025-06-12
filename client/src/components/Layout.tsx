@@ -166,8 +166,8 @@ export default function Layout({ children }: LayoutProps) {
               const isActive = location === item.href;
               return (
                 <Link key={item.name} href={item.href}>
-                  <a
-                    className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-2 sm:space-x-3'} p-2 sm:p-3 rounded-lg transition-colors touch-button ${
+                  <div
+                    className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-2 sm:space-x-3'} p-2 sm:p-3 rounded-lg transition-colors touch-button cursor-pointer ${
                       isActive
                         ? 'bg-sky-50 text-sky-700'
                         : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
@@ -177,7 +177,7 @@ export default function Layout({ children }: LayoutProps) {
                   >
                     <item.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                     {!sidebarCollapsed && <span className="text-sm sm:text-base truncate">{item.name}</span>}
-                  </a>
+                  </div>
                 </Link>
               );
             })}

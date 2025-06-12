@@ -408,16 +408,40 @@ export default function UserManagement() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-        {stats && Object.entries(stats).map(([role, count]) => (
+        {stats && Object.entries(stats)
+          .filter(([role]) => !['total', 'inactive'].includes(role))
+          .map(([role, count]) => (
           <Card key={role}>
             <CardContent className="p-4">
               <div className="text-center">
                 <div className="text-2xl font-bold">{count}</div>
-                <div className="text-sm text-gray-600 capitalize">{role.replace('_', ' ')}</div>
+                <div className="text-sm text-gray-600">{getRoleLabel(role)}</div>
               </div>
             </CardContent>
           </Card>
         ))}
+        
+        {/* Total and Inactive Cards */}
+        {stats && (
+          <>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{stats.total}</div>
+                  <div className="text-sm text-gray-600">Total</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">{stats.inactive}</div>
+                  <div className="text-sm text-gray-600">Inactive</div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Filters */}

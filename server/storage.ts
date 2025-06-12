@@ -728,7 +728,7 @@ export class DatabaseStorage implements IStorage {
       const allUsers = await this.getAllUsers();
       const stats: Record<string, number> = {};
       
-      for (const role of ["admin", "receptionist", "components", "assembly", "packaging", "shipping"]) {
+      for (const role of ["admin", "receptionist", "picker", "assembly", "packaging", "shipping", "inventory"]) {
         stats[role] = allUsers.filter(user => user.role === role && user.isActive).length;
       }
       
