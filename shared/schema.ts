@@ -292,8 +292,7 @@ export type LoginCredentials = z.infer<typeof loginSchema>;
 export const ORDER_STATUSES = [
   "created",
   "confirmed", 
-  "picking_started",
-  "components_picked",
+  "components_selected",
   "assembly_started",
   "assembly_completed",
   "packaging_started",
