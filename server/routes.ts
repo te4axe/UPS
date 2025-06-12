@@ -805,7 +805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check role permissions for status changes
       const rolePermissions: Record<string, string[]> = {
         'receptionist': ['confirmed'],
-        'picker': ['picking_started', 'components_picked'],
+        'picker': ['components_selected'],
         'inventory': ['components_selected'],
         'assembly': ['assembly_started', 'assembly_completed'],
         'packaging': ['packaging_started', 'packaged'],
