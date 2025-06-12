@@ -30,10 +30,11 @@ interface User {
 interface UserStats {
   admin: number;
   receptionist: number;
-  stock_manager: number;
+  picker: number;
   assembly: number;
   packaging: number;
   shipping: number;
+  inventory: number;
 }
 
 const userSchema = z.object({
@@ -41,7 +42,7 @@ const userSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["admin", "receptionist", "stock_manager", "assembly", "packaging", "shipping"]),
+  role: z.enum(["admin", "receptionist", "picker", "assembly", "packaging", "shipping", "inventory"]),
   isActive: z.boolean().default(true),
 });
 
@@ -357,10 +358,11 @@ export default function UserManagement() {
                         <SelectContent>
                           <SelectItem value="admin">Administrateur</SelectItem>
                           <SelectItem value="receptionist">Réceptionnaire</SelectItem>
-                          <SelectItem value="stock_manager">Gestionnaire Stock</SelectItem>
+                          <SelectItem value="picker">Ramasseur Composants</SelectItem>
                           <SelectItem value="assembly">Employé Montage</SelectItem>
                           <SelectItem value="packaging">Employé Emballage</SelectItem>
                           <SelectItem value="shipping">Expéditeur</SelectItem>
+                          <SelectItem value="inventory">Gestionnaire Stock</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -438,13 +440,14 @@ export default function UserManagement() {
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="receptionist">Receptionist</SelectItem>
-                <SelectItem value="components">Components</SelectItem>
-                <SelectItem value="assembly">Assembly</SelectItem>
-                <SelectItem value="packaging">Packaging</SelectItem>
-                <SelectItem value="shipping">Shipping</SelectItem>
+                <SelectItem value="all">Tous les Rôles</SelectItem>
+                <SelectItem value="admin">Administrateur</SelectItem>
+                <SelectItem value="receptionist">Réceptionnaire</SelectItem>
+                <SelectItem value="picker">Ramasseur Composants</SelectItem>
+                <SelectItem value="assembly">Employé Montage</SelectItem>
+                <SelectItem value="packaging">Employé Emballage</SelectItem>
+                <SelectItem value="shipping">Expéditeur</SelectItem>
+                <SelectItem value="inventory">Gestionnaire Stock</SelectItem>
               </SelectContent>
             </Select>
           </div>

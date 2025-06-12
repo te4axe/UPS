@@ -37,10 +37,10 @@ export default function Layout({ children }: LayoutProps) {
 
 
   const navigation = [
-    { name: "Vue d'ensemble", href: "/", icon: LayoutDashboard, roles: ["admin", "receptionist", "stock_manager", "assembly", "packaging", "shipping"] },
-    { name: "Gestion des Commandes", href: "/orders", icon: ShoppingCart, roles: ["admin", "receptionist", "stock_manager", "assembly", "packaging", "shipping"] },
+    { name: "Vue d'ensemble", href: "/", icon: LayoutDashboard, roles: ["admin", "receptionist", "picker", "assembly", "packaging", "shipping", "inventory"] },
+    { name: "Gestion des Commandes", href: "/orders", icon: ShoppingCart, roles: ["admin", "receptionist", "picker", "assembly", "packaging", "shipping", "inventory"] },
     { name: "Gestion des Utilisateurs", href: "/users", icon: Users, roles: ["admin"] },
-    { name: "Inventaire", href: "/inventory", icon: Package, roles: ["admin", "stock_manager", "receptionist"] },
+    { name: "Inventaire", href: "/inventory", icon: Package, roles: ["admin", "inventory", "receptionist"] },
     { name: "Rapports", href: "/reports", icon: BarChart3, roles: ["admin"] },
   ];
 
@@ -229,10 +229,11 @@ export default function Layout({ children }: LayoutProps) {
                 <div className="text-xs text-gray-500">
                   {user?.role === 'admin' ? 'Administrateur' :
                    user?.role === 'receptionist' ? 'Réceptionnaire' :
-                   user?.role === 'stock_manager' ? 'Gestionnaire Stock' :
+                   user?.role === 'picker' ? 'Ramasseur Composants' :
                    user?.role === 'assembly' ? 'Employé Montage' :
                    user?.role === 'packaging' ? 'Employé Emballage' :
-                   user?.role === 'shipping' ? 'Expéditeur' : user?.role}
+                   user?.role === 'shipping' ? 'Expéditeur' :
+                   user?.role === 'inventory' ? 'Gestionnaire Stock' : user?.role}
                 </div>
               </div>
               
