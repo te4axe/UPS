@@ -351,19 +351,19 @@ export default function Orders() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-gray-600">
                       {order.customer && (
                         <p>
-                          <span className="font-medium">Customer:</span> {order.customer.firstName} {order.customer.lastName}
+                          <span className="font-medium">Client:</span> {order.customer.firstName} {order.customer.lastName}
                         </p>
                       )}
                       {order.product && (
                         <p>
-                          <span className="font-medium">Product:</span> {order.product.name}
+                          <span className="font-medium">Produit:</span> {order.product.name}
                         </p>
                       )}
                       <p>
-                        <span className="font-medium">Amount:</span> ${order.totalAmount}
+                        <span className="font-medium">Montant:</span> ${order.totalAmount}
                       </p>
                       <p>
-                        <span className="font-medium">Created:</span> {new Date(order.createdAt).toLocaleDateString()}
+                        <span className="font-medium">Créé:</span> {new Date(order.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -404,11 +404,15 @@ export default function Orders() {
             <Card>
               <CardContent className="text-center py-12">
                 <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {user?.role === 'picker' ? 'Aucune commande à ramasser' : 'Aucune commande trouvée'}
+                </h3>
                 <p className="text-gray-600">
-                  {orders?.length === 0 
-                    ? "No orders have been created yet." 
-                    : "No orders match your current filters."}
+                  {user?.role === 'picker' 
+                    ? "Il n'y a actuellement aucune commande confirmée prête pour le ramassage des composants."
+                    : orders?.length === 0 
+                      ? "Aucune commande n'a encore été créée." 
+                      : "Aucune commande ne correspond à vos filtres actuels."}
                 </p>
               </CardContent>
             </Card>

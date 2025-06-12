@@ -21,9 +21,17 @@ export default function StatusBadge({ status, size = "default" }: StatusBadgePro
   };
 
   const formatStatus = (status: string) => {
-    return status.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+    const statusLabels = {
+      'created': 'Créé',
+      'confirmed': 'Confirmé',
+      'components_selected': 'Composants Sélectionnés',
+      'assembly_started': 'Montage Démarré',
+      'assembly_completed': 'Montage Terminé',
+      'packaged': 'Emballé',
+      'shipped': 'Expédié',
+      'delivered': 'Livré'
+    };
+    return statusLabels[status as keyof typeof statusLabels] || status;
   };
 
   const sizeClasses = {
