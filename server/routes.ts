@@ -620,7 +620,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Route pour démarrer l'emballage
-  app.patch('/api/orders/:id/start-packaging', authenticateToken, requireRole(['packer', 'admin']), async (req: AuthenticatedRequest, res) => {
+  app.patch('/api/orders/:id/start-packaging', authenticateToken, requireRole(['packaging', 'admin']), async (req: AuthenticatedRequest, res) => {
     try {
       const orderId = parseInt(req.params.id);
       const order = await storage.getOrder(orderId);
@@ -660,7 +660,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Route pour terminer l'emballage
-  app.patch('/api/orders/:id/complete-packaging', authenticateToken, requireRole(['packer', 'admin']), async (req: AuthenticatedRequest, res) => {
+  app.patch('/api/orders/:id/complete-packaging', authenticateToken, requireRole(['packaging', 'admin']), async (req: AuthenticatedRequest, res) => {
     try {
       const orderId = parseInt(req.params.id);
       const order = await storage.getOrder(orderId);
@@ -711,7 +711,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Route pour démarrer l'expédition
-  app.patch('/api/orders/:id/start-shipping', authenticateToken, requireRole(['shipper', 'admin']), async (req: AuthenticatedRequest, res) => {
+  app.patch('/api/orders/:id/start-shipping', authenticateToken, requireRole(['shipping', 'admin']), async (req: AuthenticatedRequest, res) => {
     try {
       const orderId = parseInt(req.params.id);
       const order = await storage.getOrder(orderId);
@@ -807,9 +807,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'receptionist': ['confirmed'],
         'picker': ['picking_started', 'components_picked'],
         'inventory': ['components_selected'],
-        'technician': ['assembly_started', 'assembly_completed'],
-        'packer': ['packaging_started', 'packaged'],
-        'shipper': ['shipping_started', 'shipped'],
+        'assembly': ['assembly_started', 'assembly_completed'],
+        'packaging': ['packaging_started', 'packaged'],
+        'shipping': ['shipping_started', 'shipped'],
         'admin': ORDER_STATUSES as any,
       };
 
