@@ -35,6 +35,8 @@ interface UserStats {
   packaging: number;
   shipping: number;
   inventory: number;
+  total: number;
+  inactive: number;
 }
 
 const userSchema = z.object({

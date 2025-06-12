@@ -205,7 +205,7 @@ export default function Orders() {
 
     const userCanUpdate = {
       'receptionist': ['created'],
-      'components': ['confirmed'],
+      'picker': ['confirmed'],
       'assembly': ['components_selected', 'assembly_started'],
       'packaging': ['assembly_completed'],
       'shipping': ['packaged'],
@@ -244,8 +244,14 @@ export default function Orders() {
     <div className="p-4 sm:p-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Orders</h1>
-          <p className="text-gray-600 mt-1">Manage and track customer orders</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            {user.role === 'picker' ? 'Ramassage des Composants' : 'Commandes'}
+          </h1>
+          <p className="text-gray-600 mt-1">
+            {user.role === 'picker' 
+              ? 'Commandes prêtes pour le ramassage des composants' 
+              : 'Gérer et suivre les commandes clients'}
+          </p>
         </div>
         
         {(user.role === 'admin' || user.role === 'receptionist') && (
@@ -253,14 +259,14 @@ export default function Orders() {
   <DialogTrigger asChild>
     <Button className="w-full sm:w-auto">
       <Plus className="h-4 w-4 mr-2" />
-      New Order
+      Nouvelle Commande
     </Button>
   </DialogTrigger>
   <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto mx-auto">
     <DialogHeader>
-      <DialogTitle className="text-xl font-bold">Create New Order</DialogTitle>
+      <DialogTitle className="text-xl font-bold">Créer une Nouvelle Commande</DialogTitle>
       <DialogDescription>
-        Add a new customer order with custom components from inventory
+        Ajouter une nouvelle commande client avec des composants personnalisés
       </DialogDescription>
     </DialogHeader>
     <NewOrderFormWithInventory
