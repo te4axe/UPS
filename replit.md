@@ -110,6 +110,18 @@ Ultra PC is a comprehensive order management system designed for computer hardwa
 
 ## Recent Changes
 
+### June 13, 2025 - Database Environment Synchronization
+- **Issue**: Notifications worked on Replit but not on localhost due to different databases
+- **Solution**: Modified .env.local to use same Neon database as Replit instead of local PostgreSQL
+- **Result**: Localhost and Replit now share identical data and notifications
+- **Impact**: Consistent user experience across all development environments
+
+### June 13, 2025 - Project Structure Cleanup
+- **Issue**: Repository contained development files, test assets, and migration scripts
+- **Solution**: Removed attached_assets, scripts, cookies files, and documentation files
+- **Result**: Clean project structure with only essential production files
+- **Impact**: Simplified project maintenance and deployment
+
 ### June 13, 2025 - Notification System Fix
 - **Issue**: Only administrators could see notifications; other employees saw empty notification panels
 - **Solution**: Removed restrictive role-based filtering from notification endpoint 
