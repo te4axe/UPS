@@ -141,12 +141,45 @@ export default function OrderModal({ order, onClose, onSuccess }: OrderModalProp
     return icons[status] || Clock;
   };
 
+  const formatStatus = (status: string) => {
+    const statusTranslations: Record<string, string> = {
+      'created': 'Créée',
+      'confirmed': 'Confirmée',
+      'components_selected': 'Composants Sélectionnés',
+      'assembly_started': 'Assemblage Commencé',
+      'assembly_completed': 'Assemblage Terminé',
+      'packaged': 'Emballée',
+      'shipped': 'Expédiée',
+      'delivered': 'Livrée'
+    };
+    return statusTranslations[status] || status;
+  };
+
+  const getStatusMessage = (status: string, changedBy: { firstName: string; lastName: string }, notes?: string) => {
+    if (notes) {
+      return notes;
+    }
+    
+    const statusMessages: Record<string, string> = {
+      'created': `Commande créée par ${changedBy.firstName} ${changedBy.lastName}`,
+      'confirmed': `Statut mis à jour vers confirmée par ${changedBy.firstName} ${changedBy.lastName}`,
+      'components_selected': `Composants ramassés avec succès par ${changedBy.firstName} ${changedBy.lastName}`,
+      'assembly_started': `Assemblage commencé par ${changedBy.firstName} ${changedBy.lastName}`,
+      'assembly_completed': `Assemblage terminé par ${changedBy.firstName} ${changedBy.lastName}`,
+      'packaged': `Statut mis à jour vers emballée par ${changedBy.firstName} ${changedBy.lastName}`,
+      'shipped': `Statut mis à jour vers expédiée par ${changedBy.firstName} ${changedBy.lastName}`,
+      'delivered': `Statut mis à jour vers livrée par ${changedBy.firstName} ${changedBy.lastName}`
+    };
+    
+    return statusMessages[status] || `Statut changé par ${changedBy.firstName} ${changedBy.lastName}`;
+  };
+
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       created: "text-gray-500",
       confirmed: "text-blue-500",
-      components_selected: "text-yellow-500",
-      assembly_started: "text-orange-500",
+      components_selected: "text-orange-500",
+      assembly_started: "text-yellow-500",
       assembly_completed: "text-purple-500",
       packaged: "text-indigo-500",
       shipped: "text-green-500",
@@ -160,7 +193,7 @@ export default function OrderModal({ order, onClose, onSuccess }: OrderModalProp
     
     const rolePermissions: Record<string, string[]> = {
       'receptionist': ['confirmed'],
-      'components': ['components_selected'],
+      'picker': ['components_selected'],
       'assembly': ['assembly_started', 'assembly_completed'],
       'packaging': ['packaged'],
       'shipping': ['shipped'],
@@ -191,12 +224,6 @@ export default function OrderModal({ order, onClose, onSuccess }: OrderModalProp
     } finally {
       setActionLoading(false);
     }
-  };
-
-  const formatStatus = (status: string) => {
-    return status.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
   };
 
   return (
@@ -244,7 +271,7 @@ export default function OrderModal({ order, onClose, onSuccess }: OrderModalProp
                                   {formatStatus(historyItem.status)}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  {historyItem.notes || `Status changed by ${historyItem.changedBy.firstName} ${historyItem.changedBy.lastName}`}
+                                  {getStatusMessage(historyItem.status, historyItem.changedBy, historyItem.notes)}
                                 </div>
                                 <div className="text-xs text-gray-400 mt-1">
                                   {new Date(historyItem.timestamp).toLocaleString()}
@@ -279,105 +306,91 @@ export default function OrderModal({ order, onClose, onSuccess }: OrderModalProp
                       </div>
                       <div>
                         <label className="text-sm text-gray-600">Email</label>
-                        <div className="font-medium text-gray-900">
-                          {orderData.customer?.email}
-                        </div>
+                        <div className="text-gray-900">{orderData.customer?.email}</div>
                       </div>
                       {orderData.customer?.phone && (
                         <div>
                           <label className="text-sm text-gray-600">Phone</label>
-                          <div className="font-medium text-gray-900">
-                            {orderData.customer.phone}
-                          </div>
-                        </div>
-                      )}
-                      {orderData.shippingAddress && (
-                        <div>
-                          <label className="text-sm text-gray-600 flex items-center">
-                            <MapPin className="w-4 h-4 mr-1" />
-                            Shipping Address
-                          </label>
-                          <div className="font-medium text-gray-900">
-                            {orderData.shippingAddress}
-                          </div>
+                          <div className="text-gray-900">{orderData.customer.phone}</div>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Product Details */}
+                  {/* Shipping Information */}
                   <div className="bg-white border border-gray-200 rounded-lg p-6">
                     <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                      <Monitor className="w-5 h-5 mr-2" />
-                      Product Details
+                      <MapPin className="w-5 h-5 mr-2" />
+                      Shipping Information
                     </h4>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-sm text-gray-600">Configuration</label>
-                        <div className="font-medium text-gray-900">
-                          {orderData.product?.name || 'Custom PC Build'}
+                        <label className="text-sm text-gray-600">Address</label>
+                        <div className="text-gray-900">
+                          {orderData.shippingAddress || "Address not provided"}
                         </div>
                       </div>
-                      
-                      {orderData.specifications && (
-                        <>
-                          {orderData.specifications.processor && (
-                            <div>
-                              <label className="text-sm text-gray-600 flex items-center">
-                                <Cpu className="w-4 h-4 mr-1" />
-                                Processor
-                              </label>
-                              <div className="font-medium text-gray-900">
-                                {orderData.specifications.processor}
-                              </div>
-                            </div>
-                          )}
-                          
-                          {orderData.specifications.graphics && (
-                            <div>
-                              <label className="text-sm text-gray-600 flex items-center">
-                                <Zap className="w-4 h-4 mr-1" />
-                                Graphics Card
-                              </label>
-                              <div className="font-medium text-gray-900">
-                                {orderData.specifications.graphics}
-                              </div>
-                            </div>
-                          )}
-                          
-                          {orderData.specifications.memory && (
-                            <div>
-                              <label className="text-sm text-gray-600">Memory</label>
-                              <div className="font-medium text-gray-900">
-                                {orderData.specifications.memory}
-                              </div>
-                            </div>
-                          )}
-                          
-                          {orderData.specifications.storage && (
-                            <div>
-                              <label className="text-sm text-gray-600 flex items-center">
-                                <HardDrive className="w-4 h-4 mr-1" />
-                                Storage
-                              </label>
-                              <div className="font-medium text-gray-900">
-                                {orderData.specifications.storage}
-                              </div>
-                            </div>
-                          )}
-                        </>
+                      {orderData.trackingNumber && (
+                        <div>
+                          <label className="text-sm text-gray-600">Tracking Number</label>
+                          <div className="text-gray-900 font-mono">{orderData.trackingNumber}</div>
+                        </div>
                       )}
-                      
-                      <div className="pt-3 border-t border-gray-200">
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Components */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                    <Monitor className="w-5 h-5 mr-2" />
+                    Order Components
+                  </h4>
+                  {orderData.specifications?.components ? (
+                    <div className="space-y-4">
+                      {orderData.specifications.components.map((component: any, index: number) => {
+                        const getComponentIcon = (type: string) => {
+                          const icons: Record<string, any> = {
+                            'CPU': Cpu,
+                            'Storage': HardDrive,
+                            'PSU': Zap,
+                            'default': Monitor
+                          };
+                          return icons[type] || icons.default;
+                        };
+                        
+                        const ComponentIcon = getComponentIcon(component.type);
+                        
+                        return (
+                          <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <ComponentIcon className="w-5 h-5 text-blue-600" />
+                              <div>
+                                <div className="font-medium text-gray-900">{component.name}</div>
+                                <div className="text-sm text-gray-600">
+                                  {component.brand} {component.model} - {component.type}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-medium text-gray-900">Qty: {component.quantity}</div>
+                              <div className="text-sm text-gray-600">${component.price}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div className="border-t pt-4">
                         <div className="flex justify-between items-center">
-                          <span className="text-lg font-semibold text-gray-900">Total Price</span>
-                          <span className="text-lg font-bold text-sky-blue-600">
-                            ${parseFloat(orderData.totalAmount).toLocaleString()}
-                          </span>
+                          <span className="text-lg font-medium text-gray-900">Total Amount:</span>
+                          <span className="text-xl font-bold text-green-600">${orderData.totalAmount}</span>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="text-center py-4 text-gray-500">
+                      No components specified
+                    </div>
+                  )}
                 </div>
 
                 {/* Current Status and Actions */}
@@ -393,28 +406,33 @@ export default function OrderModal({ order, onClose, onSuccess }: OrderModalProp
 
                   {(() => {
                     const nextStatus = getNextStatus(orderData.status);
-                    return nextStatus && canChangeStatus(orderData.status, nextStatus) ? (
+                    const canProceed = nextStatus && canChangeStatus(orderData.status, nextStatus);
+                    
+                    return canProceed ? (
                       <div className="space-y-4">
                         <div>
-                          <Label htmlFor="notes">Notes (Optional)</Label>
+                          <Label htmlFor="notes" className="text-sm font-medium text-gray-700">
+                            Notes (Optional)
+                          </Label>
                           <Textarea
                             id="notes"
-                            placeholder="Add any notes about this status change..."
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
+                            placeholder="Add any notes about this status change..."
                             className="mt-1"
+                            rows={3}
                           />
                         </div>
                         
-                        <div className="flex flex-wrap gap-3">
+                        <div className="flex space-x-3">
                           <Button
                             onClick={() => handleStatusUpdate(nextStatus)}
-                            disabled={actionLoading || updateStatusMutation.isPending}
-                            className="bg-green-500 hover:bg-green-600 text-white"
+                            disabled={actionLoading}
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
                           >
                             {actionLoading ? (
                               <>
-                                <Clock className="w-4 h-4 mr-2 animate-spin" />
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                                 Updating...
                               </>
                             ) : (
@@ -446,22 +464,6 @@ export default function OrderModal({ order, onClose, onSuccess }: OrderModalProp
                     );
                   })()}
                 </div>
-
-                {/* Tracking Information */}
-                {orderData.trackingNumber && (
-                  <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                      <Truck className="w-5 h-5 mr-2" />
-                      Shipping Information
-                    </h4>
-                    <div>
-                      <label className="text-sm text-gray-600">Tracking Number</label>
-                      <div className="font-medium text-gray-900 font-mono">
-                        {orderData.trackingNumber}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </>
             )}
           </div>
