@@ -108,8 +108,31 @@ Ultra PC is a comprehensive order management system designed for computer hardwa
 - **Session Secret**: Secure session encryption key
 - **Multi-environment**: Support for local, development, and production environments
 
+## Recent Changes
+
+### June 13, 2025 - Notification System Fix
+- **Issue**: Only administrators could see notifications; other employees saw empty notification panels
+- **Solution**: Removed restrictive role-based filtering from notification endpoint 
+- **Result**: All employees now see their personal notifications with unread count badges
+- **Impact**: Improved user experience across all roles with proper notification visibility
+
+### June 13, 2025 - Order History Enhancement  
+- **Issue**: Order details history showed generic messages without employee names for component picking
+- **Solution**: Enhanced OrderModal component with French localization and employee name display
+- **Result**: "Components Selected" status now shows "Composants ramassés avec succès par [Employee Name]"
+- **Impact**: Better audit trail and clearer workflow visibility
+
+### June 13, 2025 - Picker Authentication & Workflow
+- **Issue**: Picker role authentication and "Ramasser Composants" button functionality
+- **Solution**: Fixed database schema validation, added "components_selected" to ORDER_STATUSES
+- **Result**: Picker workflow fully operational with proper status transitions
+- **Impact**: Complete end-to-end order processing workflow functional
+
 ## Changelog
-- June 13, 2025. Initial setup
+- June 13, 2025. Initial setup with comprehensive order management system
+- June 13, 2025. Fixed notification system for all employee roles
+- June 13, 2025. Enhanced order history display with employee names
+- June 13, 2025. Completed picker workflow implementation
 
 ## User Preferences
 
