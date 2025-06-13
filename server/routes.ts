@@ -1017,40 +1017,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Notifications routes - filtered by role
+  // Notifications routes - show all notifications for user
   app.get('/api/notifications', authenticateToken, async (req: AuthenticatedRequest, res) => {
     try {
-      let notifications;
-      
-      // Admin sees all notifications
-      if (req.user!.role === 'admin') {
-        notifications = await storage.getUserNotifications(req.user!.id);
-      } else {
-        // Other roles only see notifications relevant to their next task
-        const allNotifications = await storage.getUserNotifications(req.user!.id);
-        
-        // Filter notifications based on role and what they need to see
-        notifications = allNotifications.filter(notification => {
-          const message = notification.message.toLowerCase();
-          const title = notification.title.toLowerCase();
-          
-          switch (req.user!.role) {
-            case 'picker':
-              return message.includes('confirmé') || title.includes('ramassage');
-            case 'assembly':
-              return message.includes('composants collectés') || message.includes('prêt pour montage') || title.includes('montage');
-            case 'packaging':
-              return message.includes('montage terminé') || message.includes('prêt pour emballage') || title.includes('emballage');
-            case 'shipping':
-              return message.includes('emballé') || message.includes('prêt pour expédition') || title.includes('expédition');
-            case 'receptionist':
-              return title.includes('nouvelle commande') || message.includes('expédié');
-            default:
-              return true;
-          }
-        });
-      }
-      
+      // All users see their own notifications - no filtering
+      const notifications = await storage.getUserNotifications(req.user!.id);
       res.json(notifications);
     } catch (error) {
       console.error('Get notifications error:', error);
